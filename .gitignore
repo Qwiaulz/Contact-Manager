@@ -1,0 +1,41 @@
+# IDE configuration and project files
+.idea/
+
+# Build and output directories
+[Dd]ebug/
+[Rr]elease/
+x64/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio and user-specific settings
+*.suo
+*.user
+*.sln.docstates
+.vs/
+
+# Log, temporary, and debugging files
+*.log
+*.tmp
+*.pdb
+*.obj
+*.userosscache/
+
+# Test results and build logs
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# Development tools configuration and cache files
+_ReSharper*/
+*.dotCover
+_TeamCity*
+
+# Package and dependency files
+*.nupkg
+**/packages/*
+
+# Operating system specific files
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store

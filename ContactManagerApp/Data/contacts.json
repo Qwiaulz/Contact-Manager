@@ -1,0 +1,16 @@
+[
+  {
+    "Id": "1",
+    "UserId": "eugen",
+    "Name": "John Doe",
+    "Phone": "123-456-7890",
+    "Email": "john.doe@example.com"
+  },
+  {
+    "Id": "2",
+    "UserId": "290edd17-220e-4f26-9cb9-f77ac08a1255",
+    "Name": "Jane Smith",
+    "Phone": "987-654-3210",
+    "Email": "jane.smith@example.com"
+  }
+]
