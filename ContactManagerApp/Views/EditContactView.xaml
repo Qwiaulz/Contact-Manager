@@ -1,0 +1,666 @@
+<Page x:Class="ContactManagerApp.Views.EditContactView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:local="clr-namespace:ContactManagerApp.Views"
+      xmlns:services="clr-namespace:ContactManagerApp.Services"
+      xmlns:services1="clr-namespace:ContactManagerApp.Services"
+      xmlns:converters="clr-namespace:ContactManagerApp.Converters"
+      Title="EditContactView">
+    <Page.Resources>
+        <!-- Існуючі ресурси -->
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:LocalizationConverter x:Key="LocalizationConverter"/>
+        <local:BooleanToForegroundConverter x:Key="BooleanToForegroundConverter"/>
+        <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter"/>
+        <local:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
+        <converters:InitialsToColorConverter x:Key="InitialsToColorConverter"/>
+
+        <!-- Стиль для іконки дії (плюсик або олівець) -->
+        <Style x:Key="PhotoActionIconStyle" TargetType="Border">
+            <Setter Property="Background" Value="#1A73E8"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="CornerRadius" Value="35"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Margin" Value="0,0,12,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        
+        <Style x:Key="ActionIconStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- Стиль для самого ContextMenu -->
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="{DynamicResource ContentBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#888888" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Popup x:Name="PART_Popup" 
+                               AllowsTransparency="True" 
+                               Placement="MousePoint" 
+                               IsOpen="{TemplateBinding IsOpen}"
+                               PopupAnimation="Fade">
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="Transparent" 
+                                    BorderThickness="0" 
+                                    CornerRadius="5">
+                                <ItemsPresenter Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </Popup>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="HasDropShadow" Value="False"/>
+        </Style>
+
+        <!-- Стиль для заголовка -->
+        <Style x:Key="HeaderStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+
+        <!-- Стиль для звичайного тексту (TextBlock) -->
+        <Style TargetType="TextBlock" BasedOn="{StaticResource HeaderStyle}">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Foreground" Value="#555"/>
+        </Style>
+
+        <!-- Стиль для кнопок -->
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}"/>
+            <Setter Property="Padding" Value="20,2,20,0"/>
+            <Setter Property="Margin" Value="0,20,50,0"/>
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="25" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1E64D4"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для кнопки "Назад" (стрілка) -->
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="Margin" Value="30,20,0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" BorderThickness="0">
+                            <TextBlock Text="←" 
+                                       FontFamily="Segoe UI Symbol"
+                                       FontSize="{TemplateBinding FontSize}" 
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="Left"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#1A73E8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Foreground" Value="#0D47A1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для маленьких кнопок "Додати" -->
+        <Style x:Key="AddButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="0,6,0,16"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Width" Value="550"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="Transparent" 
+                                CornerRadius="15" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsEnabled" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonActiveBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для кнопки "Видалити" -->
+        <Style x:Key="RemoveButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="#FF5252"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#FFEBEE"/>
+                                <Setter Property="Foreground" Value="#D32F2F"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#FFCDD2"/>
+                                <Setter Property="Foreground" Value="#B71C1C"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для іконок -->
+        <Style x:Key="IconStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <!-- Оновлений стиль для зірки (Favourite) -->
+        <Style x:Key="FavouriteStarStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Margin" Value="0,20,20,0"/>
+            <Setter Property="Foreground" Value="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource BooleanToForegroundConverter}}"/>
+            <Setter Property="Text" Value="★"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="Tag" Value="False"/>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Foreground" Value="#BBBBBB"/>
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="Tag" Value="True"/>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Foreground" Value="#FFC107"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для розділювачів -->
+        <Style x:Key="SeparatorStyle" TargetType="Border">
+            <Setter Property="Background" Value="#E8ECEF"/>
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Margin" Value="0,24,0,24"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+
+        <!-- Стиль для текстових полів -->
+        <Style TargetType="TextBox" x:Key="DefaultTextBoxStyle">
+            <Setter Property="Padding" Value="10,6"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Text" Value="Center"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#0078D4"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#0078D4"/>
+                                <Setter TargetName="Border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#0078D4" Direction="0" ShadowDepth="0" Opacity="0.5" BlurRadius="5"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для ComboBox -->
+        <Style x:Key="DefaultComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,10,0,15"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" 
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Content>
+                                    <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                      Margin="3,3,23,3"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Left"/>
+                                </ToggleButton.Content>
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*"/>
+                                                            <ColumnDefinition Width="20"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                                CornerRadius="5"/>
+                                                        <Border Grid.Column="1" Background="{TemplateBinding Background}"
+                                                                BorderBrush="{TemplateBinding BorderBrush}"
+                                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                                CornerRadius="5"/>
+                                                        <Path x:Name="Arrow" Grid.Column="1" Fill="{DynamicResource TextColor}" 
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                                    </Grid>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              Margin="13,3,23,3"
+                                              VerticalAlignment="Center"
+                                              HorizontalAlignment="Left"/>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                <Grid x:Name="DropDown" SnapsToDevicePixels="True" 
+                                      MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200">
+                                    <Border x:Name="DropDownBorder" Background="{DynamicResource ControlBackground}" 
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для елементів ComboBox -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- Стиль для пунктів контекстного меню -->
+        <Style x:Key="ContextMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="Background" Value="{DynamicResource ContentBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0" ContentSource="Icon" Margin="0,0,10,0"/>
+                                <ContentPresenter Grid.Column="1" ContentSource="Header"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="10" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок і кнопки -->
+        <Grid Grid.Row="0" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Style="{StaticResource BackButtonStyle}" Click="Cancel_Click"/>
+            <TextBlock Grid.Column="1" Style="{StaticResource HeaderStyle}" 
+                       Text="{Binding OriginalContactName}" 
+                       HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,20,0,0"/>
+            <TextBlock Grid.Column="2" 
+                       Style="{StaticResource FavouriteStarStyle}" 
+                       HorizontalAlignment="Right" 
+                       VerticalAlignment="Center"
+                       Tag="{Binding EditedContact.IsFavourite}"
+                       MouseLeftButtonDown="ToggleFavourite_Click"/>
+            <Button Grid.Column="3" Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Right" Click="Save_Click">
+                <TextBlock Foreground="{DynamicResource ButtonForeground}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" 
+                           Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                          Converter={StaticResource LocalizationConverter}, 
+                                          ConverterParameter=Save}"/>
+            </Button>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" Width="950" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Left">
+            <StackPanel MaxWidth="950" Margin="50,0,0,0">
+                <!-- Фото -->
+                <Grid HorizontalAlignment="Left" Margin="5,0,0,24">
+                    <!-- Базовий круг (фон для ініціалів або фото) -->
+                    <Ellipse Width="158" Height="158" Margin="0,10,0,0">
+                        <Ellipse.Fill>
+                            <SolidColorBrush Color="{Binding EditedContact.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
+                        </Ellipse.Fill>
+                        <Ellipse.Effect>
+                            <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
+                        </Ellipse.Effect>
+                    </Ellipse>
+                    <!-- Фото (якщо є) -->
+                    <Ellipse Width="160" Height="160" Margin="0,10,0,0">
+                        <Ellipse.Fill>
+                            <ImageBrush ImageSource="{Binding EditedContact.Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
+                        </Ellipse.Fill>
+                        <Ellipse.Clip>
+                            <EllipseGeometry RadiusX="80" RadiusY="80" Center="80,80"/>
+                        </Ellipse.Clip>
+                    </Ellipse>
+                    <!-- Ініціали (показуються, якщо фото немає або це стокове фото) -->
+                    <TextBlock Text="{Binding EditedContact.Initials}" 
+                               FontSize="40" 
+                               FontWeight="SemiBold" 
+                               Foreground="#FFFFFF" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center"
+                               Visibility="{Binding EditedContact.Photo, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Visible,Collapsed,Collapsed', FallbackValue=Visible}"/>
+                    <!-- Іконка для зміни фото -->
+                    <Border Style="{StaticResource PhotoActionIconStyle}" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown">
+                        <TextBlock x:Name="PhotoActionIcon" 
+                                   HorizontalAlignment="Center" 
+                                   VerticalAlignment="Center" 
+                                   Foreground="White">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="+"/>
+                                    <Setter Property="FontSize" Value="28"/>
+                                    <Setter Property="VerticalAlignment" Value="Center"/>
+                                    <Setter Property="Margin" Value="0,-6,0,0"/>
+                                    <Style.Triggers>
+                                        <!-- Показуємо олівець лише якщо фото НЕ стокове -->
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding EditedContact.Photo, Converter={StaticResource IsNullOrEmptyConverter}}" Value="False"/>
+                                                <Condition Binding="{Binding EditedContact.IsPhotoDefault}" Value="False"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Text" Value=""/>
+                                            <Setter Property="FontSize" Value="16"/>
+                                            <Setter Property="Margin" Value="0,0,0,0"/>
+                                            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                            <TextBlock.ContextMenu>
+                                <ContextMenu DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Page}}, Path=DataContext}">
+                                    <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=ChangePhoto}"
+                                              Command="{Binding ChoosePhotoCommand}"
+                                              Style="{StaticResource ContextMenuItemStyle}">
+                                        <MenuItem.Icon>
+                                            <TextBlock Text="✏️" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=RemovePhoto}"
+                                              Command="{Binding RemovePhotoCommand}"
+                                              Style="{StaticResource ContextMenuItemStyle}">
+                                        <MenuItem.Icon>
+                                            <TextBlock Text="🗑️" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Cancel}"
+                                              Command="{Binding CancelContextMenuCommand}"
+                                              Style="{StaticResource ContextMenuItemStyle}">
+                                        <MenuItem.Icon>
+                                            <TextBlock Text="❌" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                    </Border>
+                </Grid>
+
+                <!-- Ім'я -->
+                <StackPanel Margin="0,30,0,0">
+                    <TextBlock Foreground="{DynamicResource TextColor}" Margin="0,10,0,-30" TextAlignment="Left" FontSize="20" Text="👤"/>
+                    <TextBlock Margin="50,-25,0,-30" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Name}"/>
+                    <TextBox Style="{StaticResource DefaultTextBoxStyle}" HorizontalAlignment="Left" Width="550" Margin="40,0,0,0" Text="{Binding EditedContact.Name, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+
+                <!-- Телефони -->
+                <StackPanel Margin="0,40,0,0">
+                    <TextBlock Margin="0,10,0,-30" Style="{StaticResource IconStyle}" Text=""/>
+                    <TextBlock Margin="50,-20,0,-20" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Phone}"/>
+                    <ItemsControl ItemsSource="{Binding Phones}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Style="{StaticResource DefaultTextBoxStyle}" HorizontalAlignment="Left" Width="400" Grid.Column="0" Text="{Binding Number, UpdateSourceTrigger=PropertyChanged}" Margin="40,8,-100,0"/>
+                                    <ComboBox Style="{StaticResource DefaultComboBoxStyle}" Grid.Column="0" HorizontalAlignment="Left" Width="140" Margin="450,8,0,0" 
+                                              ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Page}, Path=PhoneTypes}"
+                                              SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Button Grid.Column="0" Style="{StaticResource RemoveButtonStyle}" Click="RemovePhoneNumber_Click" HorizontalAlignment="Left" Margin="600,8,0,0">
+                                        <TextBlock Text="✖"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Style="{StaticResource AddButtonStyle}" Click="AddPhoneNumber_Click" Margin="43,8,0,0" HorizontalAlignment="Left">
+                        <TextBlock Foreground="{DynamicResource TextColor}" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                  Converter={StaticResource LocalizationConverter}, 
+                                                  ConverterParameter=AddPhoneNumber}"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Ел. пошта -->
+                <StackPanel Margin="0,40,0,0">
+                    <TextBlock Margin="0,10,0,-30" Style="{StaticResource IconStyle}" Text=""/>
+                    <TextBlock Margin="50,-20,0,-30" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Email}"/>
+                    <ItemsControl ItemsSource="{Binding Emails}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Style="{StaticResource DefaultTextBoxStyle}" HorizontalAlignment="Left" Width="400" Grid.Column="0" Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" Margin="40,8,-100,0"/>
+                                    <ComboBox Style="{StaticResource DefaultComboBoxStyle}" Grid.Column="0" HorizontalAlignment="Left" Width="140" Margin="450,8,0,0" 
+                                              ItemsSource="{Binding RelativeSource={RelativeSource AncestorType=Page}, Path=EmailTypes}"
+                                              SelectedItem="{Binding Type, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Button Grid.Column="0" Style="{StaticResource RemoveButtonStyle}" Click="RemoveEmail_Click" HorizontalAlignment="Left" Margin="600,8,0,0"
+                                            ToolTip="Remove Email Address">
+                                        <TextBlock Text="✖"/>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Style="{StaticResource AddButtonStyle}" Click="AddEmail_Click" Margin="43,8,0,0" HorizontalAlignment="Left"
+                            ToolTip="Add Email Address">
+                        <TextBlock Foreground="{DynamicResource TextColor}" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                  Converter={StaticResource LocalizationConverter}, 
+                                                  ConverterParameter=AddEmail}"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Адреса -->
+                <StackPanel Margin="0,40,0,0">
+                    <TextBlock Margin="0,10,0,-30" Style="{StaticResource IconStyle}" Text=""/>
+                    <TextBlock Margin="50,-25,0,-30" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Address}"/>
+                    <TextBox Style="{StaticResource DefaultTextBoxStyle}" HorizontalAlignment="Left" Width="550" Margin="40,0,0,0" Text="{Binding EditedContact.Address, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+
+                <!-- Зв’язок -->
+                <StackPanel Margin="0,40,0,0">
+                    <TextBlock Margin="0,10,0,-30" Style="{StaticResource IconStyle}" Text=""/>
+                    <TextBlock Margin="50,-25,0,-30" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                      Converter={StaticResource LocalizationConverter}, 
+                                      ConverterParameter=Relationship}"/>
+                    <ComboBox Style="{StaticResource DefaultComboBoxStyle}" HorizontalAlignment="Left" Width="550" Margin="40,0,0,0" 
+                              ItemsSource="{Binding Relationships}" 
+                              SelectedItem="{Binding EditedContact.Relationship, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+
+                <!-- Примітки -->
+                <StackPanel Margin="0,40,0,16">
+                    <TextBlock Margin="0,10,0,-30" Style="{StaticResource IconStyle}" Text=""/>
+                    <TextBlock Margin="50,-25,0,-30" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Notes}"/>
+                    <TextBox Style="{StaticResource DefaultTextBoxStyle}" HorizontalAlignment="Left" Width="550" Margin="40,0,0,0" Text="{Binding EditedContact.Notes, UpdateSourceTrigger=PropertyChanged}" 
+                             AcceptsReturn="True" Height="140" TextWrapping="Wrap"/>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

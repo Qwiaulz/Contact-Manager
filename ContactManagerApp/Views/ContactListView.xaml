@@ -1,0 +1,454 @@
+<Page x:Class="ContactManagerApp.Views.ContactListView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:services="clr-namespace:ContactManagerApp.Services"
+      xmlns:views="clr-namespace:ContactManagerApp.Views"
+      xmlns:converters="clr-namespace:ContactManagerApp.Converters"
+      Title="ContactListView">
+    <Page.Resources>
+        <converters:LocalizationConverter x:Key="LocalizationConverter"/>
+        <converters:InitialsToColorConverter x:Key="InitialsToColorConverter"/>
+        <converters:CountToVisibilityConverter x:Key="CountToVisibilityConverter"/>
+        <views:BooleanToForegroundConverter x:Key="BooleanToForegroundConverter"/>
+        <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter"/>
+        <views:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
+
+        <!-- Стиль для заголовка сторінки -->
+        <Style x:Key="HeaderStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+        </Style>
+
+        <!-- Стиль для заголовків колонок -->
+        <Style x:Key="ColumnHeaderStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="12,0,0,0"/>
+            <Setter Property="TextAlignment" Value="Left"/>
+        </Style>
+
+        <!-- Стиль для ListView -->
+        <Style TargetType="ListView">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Margin" Value="0,5,0,0"/>
+            <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+        </Style>
+        
+        <!-- Стиль для кнопок бічної панелі -->
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="Padding" Value="0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="Transparent" 
+                                CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonActiveTextForeground}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для елементів ListView -->
+        <Style TargetType="ListViewItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="IsHitTestVisible" Value="True"/>
+            <EventSetter Event="MouseLeftButtonUp" Handler="ListViewItem_MouseLeftButtonUp"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                            </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для іконок дій -->
+        <Style x:Key="ActionIconStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для кнопки "Видалити" у списку -->
+        <Style x:Key="DeleteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Стиль для іконок у панелі дій -->
+        <Style x:Key="SelectionActionIconStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+            <Setter Property="Margin" Value="8,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <!-- Стиль для CheckBox -->
+        <Style x:Key="ContactCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Width" Value="50"/> <!-- Збільшено для нового розміру аватарки -->
+            <Setter Property="Height" Value="50"/> <!-- Збільшено для нового розміру аватарки -->
+            <Setter Property="Margin" Value="5,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Visibility" Value="Hidden"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid>
+                            <!-- Чекбокс (зверху) -->
+                            <Border x:Name="CheckBoxBorder" Width="25" Height="25" Background="Transparent" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="2" CornerRadius="2">
+                                <Path x:Name="CheckMark" Data="M 4 10 L 8 14 L 15 4" Stroke="{DynamicResource ButtonActiveBackground}" StrokeThickness="2.5" StrokeLineJoin="Round" Visibility="Hidden"/>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="CheckBoxBorder" Property="Background" Value="#0B57D0"/>
+                                <Setter TargetName="CheckMark" Property="Stroke" Value="White"/>
+                                <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="#0B57D0"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True"/>
+                        <Condition Binding="{Binding IsSelected}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Visibility" Value="Visible"/>
+                </MultiDataTrigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Visibility" Value="Visible"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        
+        <Style x:Key="DefaultComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="8"/>
+            <Setter Property="Margin" Value="0,10,0,15"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="Width" Value="40"/> <!-- Фіксована ширина для стрілочки -->
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" 
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="5">
+                                                        <Path x:Name="Arrow" 
+                                                              Fill="{DynamicResource TextColor}" 
+                                                              HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center"
+                                                              Data="M 0 0 L 4 4 L 8 0 Z"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <Popup x:Name="Popup" 
+                                   Placement="Bottom" 
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" 
+                                   Focusable="False" 
+                                   PopupAnimation="Slide">
+                                <Grid x:Name="DropDown" 
+                                      SnapsToDevicePixels="True" 
+                                      MinWidth="100" 
+                                      MaxHeight="200">
+                                    <Border x:Name="DropDownBorder" 
+                                            Background="{DynamicResource ControlBackground}" 
+                                            BorderBrush="{DynamicResource BorderBrush}" 
+                                            BorderThickness="1"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" 
+                                                    KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для аватарки -->
+        <Style x:Key="AvatarStyle" TargetType="Grid">
+            <Setter Property="Width" Value="50"/> <!-- Збільшено з 40 до 50 -->
+            <Setter Property="Height" Value="50"/> <!-- Збільшено з 40 до 50 -->
+            <Setter Property="Margin" Value="5,0"/>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListViewItem}, Path=IsMouseOver}" Value="True"/>
+                        <Condition Binding="{Binding IsSelected}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </MultiDataTrigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="Visibility" Value="Hidden"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Page.Resources>
+    <Grid Margin="20" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок сторінки -->
+        <TextBlock Grid.Row="0" Style="{StaticResource HeaderStyle}">
+            <TextBlock.Text>
+                <MultiBinding StringFormat="{}{0} ({1})">
+                    <Binding Source="{x:Static services:LocalizationManager.Instance}" Converter="{StaticResource LocalizationConverter}" ConverterParameter="Contacts"/>
+                    <Binding Path="FilteredContactsCount" RelativeSource="{RelativeSource AncestorType=Page}"/>
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+
+        <!-- Верхня панель: або заголовки колонок, або панель дій -->
+        <Grid Grid.Row="1" Height="40" Margin="0,8,0,0">
+            <!-- Панель із заголовками колонок -->
+            <Grid x:Name="ColumnHeadersPanel"
+                  Visibility="{Binding SelectedContacts.Count, Converter={StaticResource CountToVisibilityConverter}, ConverterParameter='0,Visible,Collapsed'}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="65"/> <!-- Збільшено з 55 до 65 для нового розміру аватарки -->
+                    <ColumnDefinition Width="*"/>  <!-- Для імені -->
+                    <ColumnDefinition Width="*"/>  <!-- Для email -->
+                    <ColumnDefinition Width="*"/>  <!-- Для телефону -->
+                    <ColumnDefinition Width="Auto"/> <!-- Для зірочки -->
+                    <ColumnDefinition Width="Auto"/> <!-- Для редагування -->
+                    <ColumnDefinition Width="Auto"/> <!-- Для видалення -->
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Name}" 
+                           Style="{StaticResource ColumnHeaderStyle}" Margin="-45,0,0,0"/>
+                <TextBlock Grid.Column="2" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Email}" 
+                           Style="{StaticResource ColumnHeaderStyle}" Margin="-22,0,0,0"/>
+                <TextBlock Grid.Column="3" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Phone}" 
+                           Style="{StaticResource ColumnHeaderStyle}" Margin="-60,0,0,0"/>
+                <!-- Нижня сіра лінія -->
+                <Border Grid.Column="0" Grid.ColumnSpan="7" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Margin="0,0,0,-1"/>
+            </Grid>
+
+            <!-- Панель дій для вибраних контактів -->
+            <Grid x:Name="SelectionActionsPanel"
+                  Background="{DynamicResource ContentBackground}"
+                  Visibility="{Binding SelectedContacts.Count, Converter={StaticResource CountToVisibilityConverter}, ConverterParameter='0,Collapsed,Visible'}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/> <!-- Для тексту "Вибрано" -->
+                    <ColumnDefinition Width="*"/>    <!-- Для заповнення простору -->
+                    <ColumnDefinition Width="Auto"/> <!-- Для кнопки "Видалити" -->
+                    <ColumnDefinition Width="80"/> <!-- Для ComboBox -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Текст "Вибрано X" -->
+                <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="0,0" FontSize="16" Foreground="{DynamicResource TextColor}">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} {1}">
+                            <Binding Source="{x:Static services:LocalizationManager.Instance}" Converter="{StaticResource LocalizationConverter}" ConverterParameter="Selected"/>
+                            <Binding Path="SelectedContacts.Count" RelativeSource="{RelativeSource AncestorType=Page}"/>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+
+                <!-- Кнопка "Видалити" -->
+                <Button Grid.Column="2" Style="{StaticResource ButtonStyle}" 
+                        Command="{Binding DeleteSelectedContactsCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="" Style="{StaticResource SelectionActionIconStyle}"/>
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Delete}" 
+                                   VerticalAlignment="Center" Margin="4,0,10,0"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- ComboBox для вибору/скасування -->
+                <ComboBox x:Name="SelectionComboBox" Grid.Column="3" Style="{StaticResource DefaultComboBoxStyle}" 
+                          DisplayMemberPath="DisplayText" Margin="8,0"
+                          SelectionChanged="SelectionComboBox_SelectionChanged"/>
+                
+            </Grid>
+        </Grid>
+
+        <!-- Список контактів -->
+        <ListView Grid.Row="2" ItemsSource="{Binding Contacts}" 
+                  x:Name="ContactsListView">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="60" MinWidth="400"> <!-- Збільшено висоту рядка з 50 до 60 для гармонії -->
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="65"/> <!-- Збільшено з 50 до 65 для нового розміру аватарки -->
+                            <ColumnDefinition Width="*"/>  <!-- Для імені -->
+                            <ColumnDefinition Width="*"/>  <!-- Для email -->
+                            <ColumnDefinition Width="*"/>  <!-- Для телефону -->
+                            <ColumnDefinition Width="Auto"/> <!-- Для зірочки -->
+                            <ColumnDefinition Width="Auto"/> <!-- Для редагування -->
+                            <ColumnDefinition Width="Auto"/> <!-- Для видалення -->
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Аватарка -->
+                        <Grid Grid.Column="0" Style="{StaticResource AvatarStyle}">
+                            <!-- Базовий круг (фон для ініціалів або фото) -->
+                            <Ellipse Width="49" Height="49"> <!-- Збільшено з 40 до 50 -->
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{Binding Initials, Converter={StaticResource InitialsToColorConverter}}"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                            <!-- Фото (якщо є) -->
+                            <Ellipse Width="50" Height="50"> <!-- Збільшено з 40 до 50 -->
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
+                                </Ellipse.Fill>
+                                <Ellipse.Clip>
+                                    <EllipseGeometry RadiusX="25" RadiusY="25" Center="25,25"/> <!-- Оновлено для нового розміру -->
+                                </Ellipse.Clip>
+                            </Ellipse>
+                            <!-- Ініціали (показуються, якщо фото немає або це дефолтне фото) -->
+                            <TextBlock Text="{Binding Initials}" FontSize="20" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Visibility="{Binding Photo, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Visible,Collapsed,Collapsed', FallbackValue=Visible}"/>
+                        </Grid>
+
+                        <!-- Чекбокс -->
+                        <CheckBox Grid.Column="0" Style="{StaticResource ContactCheckBoxStyle}"
+                                  IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <!-- Ім'я -->
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="14" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center" Margin="12,0"/>
+
+                        <!-- Ел. пошта -->
+                        <TextBlock Grid.Column="2" Text="{Binding FirstEmail}" FontSize="14" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center" Margin="12,0"/>
+
+                        <!-- Телефон -->
+                        <TextBlock Grid.Column="3" Text="{Binding FirstPhone}" FontSize="14" Foreground="{DynamicResource TextColor}" VerticalAlignment="Center" Margin="12,0"/>
+
+                        <!-- Іконка "Вибране" -->
+                        <TextBlock Grid.Column="4" Text="" FontFamily="Segoe MDL2 Assets" FontSize="16" 
+                                   Foreground="{Binding IsFavourite, Converter={StaticResource BooleanToForegroundConverter}, ConverterParameter='#FFD700,#666'}" 
+                                   Style="{StaticResource ActionIconStyle}">
+                            <TextBlock.InputBindings>
+                                <MouseBinding Gesture="LeftClick" 
+                                              Command="{Binding RelativeSource={RelativeSource AncestorType=Page}, Path=DataContext.ToggleFavouriteCommand}" 
+                                              CommandParameter="{Binding}"/>
+                            </TextBlock.InputBindings>
+                        </TextBlock>
+
+                        <!-- Іконка редагування -->
+                        <TextBlock Grid.Column="5" Text="" Style="{StaticResource ActionIconStyle}">
+                            <TextBlock.InputBindings>
+                                <MouseBinding Gesture="LeftClick" 
+                                              Command="{Binding RelativeSource={RelativeSource AncestorType=Page}, Path=DataContext.EditContactCommand}" 
+                                              CommandParameter="{Binding}"/>
+                            </TextBlock.InputBindings>
+                        </TextBlock>
+
+                        <!-- Кнопка "Видалити" -->
+                        <Button Grid.Column="6" Style="{StaticResource DeleteButtonStyle}" 
+                                Command="{Binding RelativeSource={RelativeSource AncestorType=Page}, Path=DataContext.DeleteContactCommand}" 
+                                CommandParameter="{Binding}">
+                            <TextBlock Text="🗑"/>
+                        </Button>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</Page>

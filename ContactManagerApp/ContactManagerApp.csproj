@@ -6,14 +6,20 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+  	<ApplicationIcon>Assets\Photo\icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
+      <Resource Include="Assets\Photo\icon.ico" />
       <Page Update="ContactManaherApp\Views\MainView.xaml">
         <Generator>MSBuild:Compile</Generator>
         <XamlRuntime>Wpf</XamlRuntime>
         <SubType>Designer</SubType>
       </Page>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\" />
     </ItemGroup>
 
 </Project>

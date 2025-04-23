@@ -1,141 +1,278 @@
-﻿<Window x:Class="ContactManager.Views.MainView"
+﻿<Window x:Class="ContactManagerApp.Views.MainView"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Контакти" Height="700" Width="1100"
-        WindowStartupLocation="CenterScreen"
-        Background="#F6F8FC">
+        xmlns:services="clr-namespace:ContactManagerApp.Services"
+        xmlns:converters="clr-namespace:ContactManagerApp.Converters"
+        Title="Contact Manager" Height="800" Width="1350"
+        Icon="/Assets/Photo/icon.ico"
+        WindowStartupLocation="CenterScreen">
     <Window.Resources>
-        <!-- Стиль для всіх кнопок в бічній панелі -->
+        <converters:LocalizationConverter x:Key="LocalizationConverter"/>
+        
+        <!-- Стиль для кнопок бічної панелі -->
         <Style x:Key="SidebarButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="#E0E0E0"/>
-            <Setter Property="Foreground" Value="#001d35"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Padding" Value="10,0"/>
+            <Setter Property="Margin" Value="0,0,0,10"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="Transparent" 
+                                CornerRadius="20" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonActiveTextForeground}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Шаблон для кнопки "Створити контакт" -->
+        <Style x:Key="AddContactButtonTemplate" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="15,15,0,15"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" 
+                                CornerRadius="13" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <!-- Стиль для ToggleButton -->
+        <Style x:Key="ToggleSidebarButtonStyle" TargetType="ToggleButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
             <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="HorizontalContentAlignment" Value="Left"/>
-            <Setter Property="Margin" Value="-10,0,0,0"/>
-            <Setter Property="Height" Value="45"/> <!-- Висота кнопок -->
-            <Setter Property="Width" Value="220"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
-            <Style.Triggers>
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="#4285F4"/>
-                    <Setter Property="Foreground" Value="White"/>
-                </Trigger>
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="#2C6CC2"/>
-                </Trigger>
-            </Style.Triggers>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="FontSize" Value="35"/>
+            <Setter Property="Width" Value="30"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ToggleButton">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" 
+                                CornerRadius="5" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonActiveTextForeground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
-        <!-- Шаблон для кнопок -->
-        <ControlTemplate x:Key="ButtonTemplate" TargetType="Button">
-            <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                    BorderThickness="1" CornerRadius="20" Padding="10">
-                <ContentPresenter HorizontalAlignment="Left" VerticalAlignment="Center"/>
-            </Border>
-        </ControlTemplate>
+        <!-- Стиль для кнопки логотипу -->
+        <Style x:Key="LogoButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Width" Value="35"/>
+            <Setter Property="Height" Value="35"/>
+            <Setter Property="Margin" Value="20,0,15,0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="17.5">
+                            <Ellipse Width="35" Height="35">
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="/Assets/Photo/icon.ico" Stretch="UniformToFill"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
+    <Border Background="{DynamicResource WindowBackground}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="65"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="260"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+            <!-- Верхня панель -->
+            <Border Grid.Row="0" Background="{DynamicResource WindowBackground}">
+                <Grid Margin="0,0,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-        <!-- Sidebar -->
-        <StackPanel Grid.Column="0" Background="Transparent" Margin="10" HorizontalAlignment="Left">
-            <!-- Header -->
-            <StackPanel Orientation="Horizontal" Margin="0,20,10,20">
-                <Ellipse Width="32" Height="32" Fill="#4285F4" VerticalAlignment="Center"/>
-                <TextBlock Text="Контакти" FontSize="20" FontWeight="Bold" Margin="10,0,0,0" VerticalAlignment="Center" Foreground="#202124"/>
-            </StackPanel>
+                    <!-- ToggleButton зліва -->
+                    <ToggleButton x:Name="ToggleSidebarButton" Grid.Column="0" 
+                                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,5,0,0"
+                                  Content="≡" Style="{StaticResource ToggleSidebarButtonStyle}"
+                                  IsChecked="{Binding IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}}"/>
 
-            <!-- New contact -->
-            <Button Content="➕ Створити контакт"
-                    Background="#E0E0E0"
-                    Foreground="#001d35"
-                    FontSize="14"
-                    FontWeight="Bold"
-                    Padding="10, 10,10, 10"
-                    Cursor="Hand"
-                    HorizontalContentAlignment="Center"
-                    Margin="30,0,30,0"
-                    Height="60"
-                    BorderBrush="Transparent"
-                    Template="{StaticResource ButtonTemplate}"/>
+                    <!-- Логотип, посунутий вправо -->
+                    <StackPanel Orientation="Horizontal" Grid.Column="0" VerticalAlignment="Center" Margin="50,0,0,0">
+                        <Button x:Name="LogoButton" Style="{StaticResource LogoButtonStyle}" Click="LogoButton_Click"/>
+                        <TextBlock Style="{DynamicResource HeaderStyle}" Text="Contact Manager" Margin="0" Foreground="{DynamicResource TextColor}"/>
+                    </StackPanel>
 
-            <!-- Menu -->
-            <StackPanel Margin="10,10,10,0">
-                <Button Content="👤 Контакти" Style="{StaticResource SidebarButtonStyle}" Template="{StaticResource ButtonTemplate}"/>
-                <Button Content="⏱ Часті" Style="{StaticResource SidebarButtonStyle}" Template="{StaticResource ButtonTemplate}"/>
-                <Button Content="ℹ Інші контакти" Style="{StaticResource SidebarButtonStyle}" Template="{StaticResource ButtonTemplate}"/>
-            </StackPanel>
-
-            <!-- Separator -->
-            <TextBlock Text="Упорядкування" FontWeight="Bold" FontSize="12" Foreground="Gray" Margin="10,30,10,10"/>
-
-            <StackPanel Margin="10,0,10,0">
-                <Button Content="🔗 Об'єднати й виправити" Style="{StaticResource SidebarButtonStyle}" Template="{StaticResource ButtonTemplate}"/>
-                <Button Content="📁 Імпортувати" Style="{StaticResource SidebarButtonStyle}" Template="{StaticResource ButtonTemplate}"/>
-                <Button Content="🗑 Кошик" Style="{StaticResource SidebarButtonStyle}" Template="{StaticResource ButtonTemplate}"/>
-            </StackPanel>
-
-            <!-- Labels -->
-            <TextBlock Text="Мітки" FontWeight="Bold" FontSize="12" Foreground="Gray" Margin="10,30,10,10"/>
-            <Button Content="+ Додати мітку" Margin="10,0,10,0" Background="Transparent" BorderThickness="0" Foreground="#1967D2" Cursor="Hand"/>
-        </StackPanel>
-
-        <!-- Main content -->
-        <Grid Grid.Column="1" Background="#F6F8FC" Margin="20">
-            <StackPanel>
-                <!-- Search -->
-                <DockPanel Margin="0,0,0,20" HorizontalAlignment="Left">
-                    <Border Background="White" CornerRadius="20" Padding="10" Height="40"
-                            BorderBrush="#DADCE0" BorderThickness="1" Width="320">
+                    <!-- Поле пошуку -->
+                    <Border Grid.Column="1" Style="{DynamicResource SearchBoxStyle}" Width="750" Margin="20,0,0,0" HorizontalAlignment="Left">
                         <DockPanel>
-                            <TextBlock Text="🔍" FontSize="14" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBox Background="Transparent" BorderThickness="0" FontSize="14"
-                                     VerticalContentAlignment="Center" Width="260"
-                                     Foreground="#202124"/>
+                            <TextBlock Text="🔍" Foreground="{DynamicResource TextColor}" FontSize="16" VerticalAlignment="Center" Margin="10,0,20,0"/>
+                            <TextBox x:Name="SearchBox" Background="Transparent" BorderThickness="0" FontSize="14"
+                                     VerticalContentAlignment="Center" Width="670" Foreground="{DynamicResource TextColor}" HorizontalAlignment="Left"
+                                     FontFamily="Segoe UI" TextChanged="SearchBox_TextChanged"/>
                         </DockPanel>
                     </Border>
-                </DockPanel>
+                </Grid>
+            </Border>
 
-                <!-- Title -->
-                <TextBlock Text="Контакти (19)" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+            <Grid Grid.Row="1" x:Name="MainGrid">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="SidebarColumn" Width="280"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
 
-                <!-- Table -->
-                <DataGrid AutoGenerateColumns="False" HeadersVisibility="Column"
-                          CanUserAddRows="False" CanUserResizeRows="False" IsReadOnly="True"
-                          RowHeight="48" GridLinesVisibility="None" BorderThickness="0"
-                          Background="White" FontSize="14" 
-                          HorizontalGridLinesBrush="#E0E0E0" ColumnHeaderHeight="42"
-                          VerticalGridLinesBrush="Transparent" Margin="0,0,0,10">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Назва" Width="2*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0">
-                                        <Grid Width="32" Height="32" Margin="0,0,10,0">
-                                            <Ellipse Fill="#E8EAED"/>
-                                            <TextBlock Text="{Binding Initials}" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                       FontWeight="Bold" Foreground="#5F6368" FontSize="14"/>
-                                        </Grid>
-                                        <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="14"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                <!-- Бічна панель -->
+                <StackPanel Grid.Column="0" Background="{DynamicResource WindowBackground}">
+                    <!-- New contact -->
+                    <Button x:Name="AddContactButton" Style="{DynamicResource AddContactButtonTemplate}" Click="AddContactButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="+" FontSize="30" Margin="-5,-8,10,0" Foreground="{DynamicResource TextColor}"/>
+                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                      Converter={StaticResource LocalizationConverter}, 
+                                                      ConverterParameter=CreateContact}" 
+                                       FontSize="14" FontFamily="Segoe UI" Margin="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="{DynamicResource TextColor}"/>
+                        </StackPanel>
+                    </Button>
 
-                        <DataGridTextColumn Header="Ел. пошта" Binding="{Binding Email}" Width="2*"/>
-                        <DataGridTextColumn Header="Номер телефону" Binding="{Binding Phone}" Width="2*"/>
-                        <DataGridTextColumn Header="Посада й компанія" Binding="{Binding Company}" Width="2*"/>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </StackPanel>
+                    <!-- Menu -->
+                    <StackPanel x:Name="Sidebar" Margin="15,10,0,0">
+                        <Button x:Name="ContactsButton" Style="{DynamicResource SidebarButtonStyle}" Click="ContactsButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="👤" FontSize="16" Margin="0,0,10,0" Foreground="{DynamicResource TextColor}"/>
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                          Converter={StaticResource LocalizationConverter}, 
+                                                          ConverterParameter=Contacts}" 
+                                           FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="FavouriteButton" Style="{DynamicResource SidebarButtonStyle}" Click="FavouriteButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="★" FontSize="20" Margin="0,-5,10,-20" Foreground="{DynamicResource TextColor}"/>
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                          Converter={StaticResource LocalizationConverter}, 
+                                                          ConverterParameter=Selected}" 
+                                           FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <!-- Separator -->
+                    <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Organization}" 
+                               FontSize="14" FontFamily="Segoe UI" FontWeight="Bold" Margin="16,20,16,10" Foreground="{DynamicResource TextColor}"/>
+
+                    <StackPanel Margin="16,0,16,0">
+                        <Button x:Name="MergeFixButton" Style="{DynamicResource SidebarButtonStyle}" Click="FindDublicate_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔗" FontSize="16" Margin="0,0,10,0" Foreground="{DynamicResource TextColor}"/>
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                          Converter={StaticResource LocalizationConverter}, 
+                                                          ConverterParameter=FindDuplicate}" 
+                                           FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="TrashButton" Style="{DynamicResource SidebarButtonStyle}" Click="TrashButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🗑" FontSize="16" Margin="0,0,10,0" Foreground="{DynamicResource TextColor}"/>
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                          Converter={StaticResource LocalizationConverter}, 
+                                                          ConverterParameter=Basket}" 
+                                           FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    
+                    <!-- Settings -->
+                    <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Settings}" 
+                               FontSize="14" FontWeight="Bold" Margin="16,20,16,10" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                    <StackPanel Margin="15,0,0,0">
+                        <Button x:Name="SettingsButton" Style="{DynamicResource SidebarButtonStyle}" Click="SettingsButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚙" FontSize="16" Margin="0,0,10,0" Foreground="{DynamicResource TextColor}"/>
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                          Converter={StaticResource LocalizationConverter}, 
+                                                          ConverterParameter=Settings}" 
+                                           FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="LogoutButton" Style="{DynamicResource SidebarButtonStyle}" Click="LogoutButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🚪" FontSize="16" Margin="0,0,10,0" Foreground="{DynamicResource TextColor}"/>
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                          Converter={StaticResource LocalizationConverter}, 
+                                                          ConverterParameter=Logout}" 
+                                           FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </StackPanel>
+                <!-- Основний контент із "плиткою" -->
+                <Border Grid.Column="1" Background="{DynamicResource ContentBackground}" Margin="30,20,20,20" CornerRadius="20">
+                    <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
+                </Border>
+            </Grid>
         </Grid>
-    </Grid>
+    </Border>
 </Window>

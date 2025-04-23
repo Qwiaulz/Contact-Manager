@@ -1,0 +1,369 @@
+<Page x:Class="ContactManagerApp.Views.ContactDetailsView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:services="clr-namespace:ContactManagerApp.Services"
+      xmlns:converters="clr-namespace:ContactManagerApp.Converters"
+      xmlns:views="clr-namespace:ContactManagerApp.Views"
+      Title="ContactDetailsView">
+    <Page.Resources>
+        <converters:LocalizationConverter x:Key="LocalizeConverter"/>
+        <converters:LocalizedDateConverter x:Key="LocalizedDateConverter"/>
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:InitialsToColorConverter x:Key="InitialsToColorConverter"/>
+        <views:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
+        <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter"/>
+        <views:BooleanToForegroundConverter x:Key="BooleanToForegroundConverter"/>
+        <converters:PhotoVisibilityConverter x:Key="PhotoVisibilityConverter"/>
+
+        <!-- Стиль для іконки дії (плюсик) -->
+        <Style x:Key="PhotoActionIconStyle" TargetType="Border">
+            <Setter Property="Background" Value="#1A73E8"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="CornerRadius" Value="35"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Margin" Value="0,0,12,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="{DynamicResource ButtonBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}"/>
+            <Setter Property="Padding" Value="20,2,20,0"/>
+            <Setter Property="Margin" Value="0,10,20,0"/>
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="25" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#1E64D4"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="{DynamicResource ButtonPressedBackground}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="BackButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="Margin" Value="4,5,0,0"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="36"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" BorderThickness="0">
+                            <TextBlock Text="←" 
+                                       FontFamily="Segoe UI Symbol"
+                                       FontSize="{TemplateBinding FontSize}" 
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#1A73E8"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DeleteButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="Margin" Value="0,10,0,0"/>
+            <Setter Property="Foreground" Value="#666"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Width" Value="24"/>
+            <Setter Property="Height" Value="24"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="Transparent" BorderThickness="0">
+                            <TextBlock Text="🗑️" 
+                                       FontFamily="Segoe UI Emoji"
+                                       FontSize="{TemplateBinding FontSize}" 
+                                       Foreground="{TemplateBinding Foreground}"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="#FF5252"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Foreground" Value="#D32F2F"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#888"/>
+            <Setter Property="Margin" Value="0,16,0,8"/>
+        </Style>
+        
+        <Style x:Key="HeaderStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="FontSize" Value="28"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
+        </Style>
+        
+        <Style TargetType="TextBlock" BasedOn="{StaticResource HeaderStyle}">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Normal"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+            <Setter Property="Foreground" Value="#555"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="DetailTextStyle">
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Margin" Value="0,4"/>
+        </Style>
+
+        <Style TargetType="TextBlock" x:Key="NotesTextStyle" BasedOn="{StaticResource DetailTextStyle}">
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="MaxWidth" Value="400"/>
+        </Style>
+
+        <Style x:Key="IconStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="Segoe MDL2"/>
+            <Setter Property="FontSize" Value="20"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+        </Style>
+
+        <Style x:Key="FavouriteStarStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="Margin" Value="0,10,20,0"/>
+            <Setter Property="Foreground" Value="{Binding Tag, RelativeSource={RelativeSource Self}, Converter={StaticResource BooleanToForegroundConverter}}"/>
+            <Setter Property="Text" Value="★"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Style.Triggers>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="Tag" Value="False"/>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Foreground" Value="#BBBBBB"/>
+                </MultiTrigger>
+                <MultiTrigger>
+                    <MultiTrigger.Conditions>
+                        <Condition Property="Tag" Value="True"/>
+                        <Condition Property="IsMouseOver" Value="True"/>
+                    </MultiTrigger.Conditions>
+                    <Setter Property="Foreground" Value="#FFC107"/>
+                </MultiTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="SeparatorStyle" TargetType="Border">
+            <Setter Property="Background" Value="#E8ECEF"/>
+            <Setter Property="Height" Value="1"/>
+            <Setter Property="Margin" Value="0,16,0,16"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        </Style>
+    </Page.Resources>
+    <Grid Margin="30,30,30,30" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Заголовок -->
+            <RowDefinition Height="Auto"/> <!-- Аватарка -->
+            <RowDefinition Height="*"/> <!-- Деталі -->
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <Grid Grid.Row="0" Margin="0,-10,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Style="{StaticResource BackButtonStyle}" Click="GoBack_Click"/>
+            <TextBlock Grid.Column="1" Style="{StaticResource HeaderStyle}"
+                       Text="{Binding SelectedContact.Name}"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" Margin="16,5,0,0"/>
+            <TextBlock Grid.Column="2" 
+                       Style="{StaticResource FavouriteStarStyle}" 
+                       HorizontalAlignment="Right" 
+                       VerticalAlignment="Center"
+                       Tag="{Binding SelectedContact.IsFavourite}"
+                       MouseLeftButtonDown="ToggleFavourite_Click"/>
+            <Button Grid.Column="3" Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Right" Click="EditContact_Click">
+                <TextBlock Foreground="{DynamicResource ButtonForeground}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" 
+                           Text="{Binding Converter={StaticResource LocalizeConverter}, ConverterParameter=Edit}"/>
+            </Button>
+            <Button Grid.Column="4" Style="{StaticResource DeleteButtonStyle}" Click="DeleteContact_Click" ToolTip="{Binding Converter={StaticResource LocalizeConverter}, ConverterParameter=Delete}"/>
+        </Grid>
+
+        <!-- Аватарка -->
+        <Grid Grid.Row="1" HorizontalAlignment="Left" Margin="25,10,0,24">
+            <!-- Базовий круг (фон для ініціалів або фото) -->
+            <Ellipse Width="160" Height="160">
+                <Ellipse.Fill>
+                    <SolidColorBrush Color="{Binding SelectedContact.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
+                </Ellipse.Fill>
+                <Ellipse.Effect>
+                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
+                </Ellipse.Effect>
+            </Ellipse>
+            <!-- Фото (якщо є) -->
+            <Ellipse Width="160" Height="160">
+                <Ellipse.Fill>
+                    <ImageBrush ImageSource="{Binding SelectedContact.Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
+                </Ellipse.Fill>
+                <Ellipse.Clip>
+                    <EllipseGeometry RadiusX="80" RadiusY="80" Center="80,80"/>
+                </Ellipse.Clip>
+            </Ellipse>
+            <!-- Ініціали (показуються, якщо фото немає або це дефолтне фото) -->
+            <TextBlock Text="{Binding SelectedContact.Initials}" 
+                       FontSize="40" 
+                       FontWeight="SemiBold" 
+                       Foreground="#FFFFFF" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center"
+                       Visibility="{Binding SelectedContact.Photo, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Visible,Collapsed,Collapsed', FallbackValue=Visible}"/>
+            <!-- Іконка для додавання фото -->
+            <Border x:Name="AddPhotoCircle" 
+                    Style="{StaticResource PhotoActionIconStyle}" 
+                    MouseLeftButtonDown="AddPhotoCircle_MouseLeftButtonDown"
+                    Visibility="{Binding SelectedContact, Converter={StaticResource PhotoVisibilityConverter}}">
+                <TextBlock HorizontalAlignment="Center" 
+                           VerticalAlignment="Center" 
+                           Foreground="White" 
+                           Text="+" 
+                           FontSize="28" 
+                           Margin="0,-6,0,0"/>
+            </Border>
+        </Grid>
+
+        <!-- Деталі -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="25,10,0,0">
+            <StackPanel>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid Grid.Column="0" Margin="0,0,130,0" MaxWidth="450">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{Binding Converter={StaticResource LocalizeConverter}, ConverterParameter=ContactInfo}" Style="{StaticResource SectionHeaderStyle}"/>
+                            <ItemsControl ItemsSource="{Binding SelectedContact.Emails}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="✉️" Style="{StaticResource IconStyle}"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Address}" Style="{StaticResource DetailTextStyle}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <ItemsControl ItemsSource="{Binding SelectedContact.Phones}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="📱" Style="{StaticResource IconStyle}"/>
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Number}" Style="{StaticResource DetailTextStyle}"/>
+                                                <TextBlock Text=" - " Margin="4,0" Style="{StaticResource DetailTextStyle}"/>
+                                                <TextBlock Text="{Binding Type}" Style="{StaticResource DetailTextStyle}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Grid Visibility="{Binding SelectedContact.Address, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Collapsed,Visible,Visible'}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="🏠" Style="{StaticResource IconStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SelectedContact.Address}" Style="{StaticResource DetailTextStyle}"/>
+                            </Grid>
+                            <Grid Visibility="{Binding SelectedContact.Relationship, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Collapsed,Visible,Visible'}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="👥" Style="{StaticResource IconStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SelectedContact.Relationship}" Style="{StaticResource DetailTextStyle}"/>
+                            </Grid>
+                            <Grid Visibility="{Binding SelectedContact.Notes, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Collapsed,Visible,Visible'}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="📝" Style="{StaticResource IconStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SelectedContact.Notes}" Style="{StaticResource NotesTextStyle}"/>
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Grid.Column="1">
+                        <TextBlock Text="{Binding Converter={StaticResource LocalizeConverter}, ConverterParameter=History}" Style="{StaticResource SectionHeaderStyle}"/>
+                        <TextBlock Style="{StaticResource DetailTextStyle}">
+                            <TextBlock.Text>
+                                <MultiBinding Converter="{StaticResource LocalizedDateConverter}">
+                                    <Binding Path="SelectedContact.UpdatedDate"/>
+                                    <Binding Converter="{StaticResource LocalizeConverter}" ConverterParameter="UpdatedDateLabel"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource DetailTextStyle}">
+                            <TextBlock.Text>
+                                <MultiBinding Converter="{StaticResource LocalizedDateConverter}">
+                                    <Binding Path="SelectedContact.CreatedDate"/>
+                                    <Binding Converter="{StaticResource LocalizeConverter}" ConverterParameter="CreatedDateLabel"/>
+                                </MultiBinding>
+                            </TextBlock.Text>
+                        </TextBlock>
+                    </StackPanel>
+                </Grid>
+
+                <Border Style="{StaticResource SeparatorStyle}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Page>

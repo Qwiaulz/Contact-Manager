@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Фон -->
+    <SolidColorBrush x:Key="WindowBackground" Color="#1F1F1F"/>
+    <SolidColorBrush x:Key="ContentBackground" Color="#1c1c21"/>
+    <SolidColorBrush x:Key="ControlBackground" Color="#262626"/>
+    
+    <!-- Текст -->
+    <SolidColorBrush x:Key="TextColor" Color="#bfbfbf"/>
+    
+    <!-- Кольори кнопок -->
+    <SolidColorBrush x:Key="ButtonBackground" Color="#0b57d0"/>
+    <SolidColorBrush x:Key="ButtonForeground" Color="#ffffff"/>
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#242424"/>
+    <SolidColorBrush x:Key="ButtonActiveBackground" Color="#163f5a"/>
+    <SolidColorBrush x:Key="ButtonTextForeground" Color="#bfbfbf"/>
+    <SolidColorBrush x:Key="ButtonActiveTextForeground" Color="#99c3e6"/>
+    <SolidColorBrush x:Key="ButtonPressedBackground" Color="#163f52"/>
+    
+    
+    <!-- Фон для бічної панелі -->
+    <SolidColorBrush x:Key="SidebarBackground" Color="#F3F3F3"/>
+    
+    <!-- Межа -->
+    <SolidColorBrush x:Key="BorderBrush" Color="#555555"/>
+    
+    <!-- Колір тіні -->
+    <Color x:Key="ShadowColor">#CFCFCF</Color>
+</ResourceDictionary>
