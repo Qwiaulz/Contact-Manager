@@ -203,13 +203,44 @@ namespace ContactManagerApp.Views
 
         private void PermanentlyDeleteSelectedContacts(object parameter)
         {
-            foreach (var contact in SelectedContacts.ToList())
+            var contactsToDelete = SelectedContacts.ToList();
+            if (contactsToDelete.Any())
             {
-                _contactService.DeleteContact(contact);
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("PermanentlyDeleteTitle"),
+                    Message = LocalizationManager.GetString("PermanentlyDeleteMessage"),
+                    ConfirmButtonText = LocalizationManager.GetString("DeletePermanently"),
+                    CancelButtonText = LocalizationManager.GetString("Cancel")
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) =>
+                {
+                    if (result)
+                    {
+                        foreach (var contact in contactsToDelete)
+                        {
+                            _contactService.DeleteContact(contact);
+                        }
+                        SelectedContacts.Clear();
+                        _trashContactsViewSource.View.Refresh();
+                        UpdateFilteredTrashContactsCount();
+                    }
+                };
+
+                window.ShowDialog();
             }
-            SelectedContacts.Clear();
-            _trashContactsViewSource.View.Refresh();
-            UpdateFilteredTrashContactsCount();
         }
 
         private void SelectAll(object parameter)

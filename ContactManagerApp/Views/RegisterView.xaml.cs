@@ -1,20 +1,48 @@
 using ContactManagerApp.Services;
 using System;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using ContactManagerApp.Models;
 
 namespace ContactManagerApp.Views
 {
-    public partial class RegistrationView : Window
+    public partial class RegistrationView : UserControl, INotifyPropertyChanged
     {
         private readonly SettingService _settingService;
+        private string _passwordText = "";
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public event Action NavigateToLogin;
+
+        public string PasswordText
+        {
+            get => _passwordText;
+            set
+            {
+                _passwordText = value;
+                OnPropertyChanged(nameof(PasswordText));
+            }
+        }
 
         public RegistrationView()
         {
             InitializeComponent();
+            DataContext = this;
+            PasswordText = "";
             _settingService = App.SettingStorage;
             System.Diagnostics.Debug.WriteLine("RegistrationView initialized");
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            PasswordText = PasswordBox.Password;
+            System.Diagnostics.Debug.WriteLine($"Password changed: Length = {PasswordText.Length}");
+        }
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         private void RegisterButton_Click(object sender, RoutedEventArgs e)
@@ -22,46 +50,70 @@ namespace ContactManagerApp.Views
             string username = UsernameTextBox.Text;
             string password = PasswordBox.Password;
 
-            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+            UsernameError.Visibility = Visibility.Collapsed;
+            PasswordError.Visibility = Visibility.Collapsed;
+
+            string usernameError = null;
+            string passwordError = null;
+
+            if (string.IsNullOrWhiteSpace(username))
             {
-                MessageBox.Show(LocalizationManager.GetString("AllFieldsRequired"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
-                System.Diagnostics.Debug.WriteLine("Registration failed: Empty username or password");
-                return;
+                usernameError = "Username cannot be empty.";
+                System.Diagnostics.Debug.WriteLine("Registration failed: Empty username");
+            }
+            if (string.IsNullOrWhiteSpace(password))
+            {
+                passwordError = "Password cannot be empty.";
+                System.Diagnostics.Debug.WriteLine("Registration failed: Empty password");
             }
 
-            if (username.Length < 3)
+            if (usernameError == null && username.Length < 3)
             {
-                MessageBox.Show(LocalizationManager.GetString("InvalidCredentialsError"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                usernameError = "Username must be at least 3 characters long.";
                 System.Diagnostics.Debug.WriteLine("Registration failed: Username too short");
-                return;
             }
-
-            if (password.Length < 8)
+            if (passwordError == null && password.Length < 8)
             {
-                MessageBox.Show(LocalizationManager.GetString("PasswordMinLength"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                passwordError = "Password must be at least 8 characters long.";
                 System.Diagnostics.Debug.WriteLine("Registration failed: Password too short");
-                return;
             }
 
-            if (username.Contains(" ") || password.Contains(" "))
+            if (usernameError == null && username.Contains(" "))
             {
-                MessageBox.Show(LocalizationManager.GetString("InvalidCredentialsError"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
-                System.Diagnostics.Debug.WriteLine("Registration failed: Username or password contains spaces");
-                return;
+                usernameError = "Username cannot contain spaces.";
+                System.Diagnostics.Debug.WriteLine("Registration failed: Username contains spaces");
+            }
+            if (passwordError == null && password.Contains(" "))
+            {
+                passwordError = "Password cannot contain spaces.";
+                System.Diagnostics.Debug.WriteLine("Registration failed: Password contains spaces");
             }
 
-            if (AuthService.UsersExist(username))
+            if (usernameError == null && AuthService.UsersExist(username))
             {
-                MessageBox.Show(LocalizationManager.GetString("UserExistsError"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                usernameError = "Username already exists.";
                 System.Diagnostics.Debug.WriteLine($"Registration failed: Username {username} already exists");
+            }
+
+            if (usernameError != null)
+            {
+                UsernameError.Text = usernameError;
+                UsernameError.Visibility = Visibility.Visible;
+            }
+            if (passwordError != null)
+            {
+                PasswordError.Text = passwordError;
+                PasswordError.Visibility = Visibility.Visible;
+            }
+
+            if (usernameError != null || passwordError != null)
+            {
                 return;
             }
 
             if (AuthService.Register(username, password, out User newUser))
             {
                 System.Diagnostics.Debug.WriteLine($"Registration successful: User {username}, UserId: {newUser.UserId}");
-                MessageBox.Show(LocalizationManager.GetString("RegistrationSuccess") ?? "Registration successful!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
                 var user = AuthService.Login(username, password);
                 if (user != null)
                 {
@@ -83,35 +135,32 @@ namespace ContactManagerApp.Views
 
                     App.CurrentUser = user;
 
-                    // Застосовуємо налаштування мови і теми
-                    LocalizationManager.CurrentLanguage = user.Language;
                     ThemeManager.ApplyTheme(user.Theme);
-                    System.Diagnostics.Debug.WriteLine($"Applied settings for new user: Language={user.Language}, Theme={user.Theme}");
+                    System.Diagnostics.Debug.WriteLine($"Applied settings for new user: Theme={user.Theme}");
 
                     var contactService = new ContactService(user.ContactFolderCode);
                     MainView mainView = new MainView(contactService);
                     mainView.Show();
-                    Close();
+                    Window.GetWindow(this).Close();
                 }
                 else
                 {
-                    MessageBox.Show("Error: Failed to log in after registration", LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+                    PasswordError.Text = "Failed to log in after registration.";
+                    PasswordError.Visibility = Visibility.Visible;
                     System.Diagnostics.Debug.WriteLine("Failed to log in after registration");
                 }
             }
             else
             {
-                MessageBox.Show(LocalizationManager.GetString("RegistrationFailed") ?? "Registration failed. Please try again.", LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+                PasswordError.Text = "Registration failed. Please try again.";
+                PasswordError.Visibility = Visibility.Visible;
                 System.Diagnostics.Debug.WriteLine("Registration failed: Unknown error");
             }
         }
 
         private void LoginLink_Click(object sender, RoutedEventArgs e)
         {
-            LoginView loginView = new LoginView();
-            loginView.Show();
-            Close();
-            System.Diagnostics.Debug.WriteLine("Navigated to LoginView");
+            NavigateToLogin?.Invoke();
         }
     }
 }

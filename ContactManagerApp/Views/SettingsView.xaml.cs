@@ -101,19 +101,79 @@ namespace ContactManagerApp.Views
 
             if (string.IsNullOrWhiteSpace(oldPassword) || string.IsNullOrWhiteSpace(newPassword) || string.IsNullOrWhiteSpace(confirmNewPassword))
             {
-                MessageBox.Show(LocalizationManager.GetString("AllFieldsRequired"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("Error"),
+                    Message = LocalizationManager.GetString("AllFieldsRequired"),
+                    ConfirmButtonText = LocalizationManager.GetString("OK"),
+                    CancelButtonText = "" // Приховуємо кнопку "Скасувати"
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) => { };
+                window.ShowDialog();
                 return;
             }
 
             if (newPassword.Length < 8)
             {
-                MessageBox.Show(LocalizationManager.GetString("PasswordMinLength"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("Error"),
+                    Message = LocalizationManager.GetString("PasswordMinLength"),
+                    ConfirmButtonText = LocalizationManager.GetString("OK"),
+                    CancelButtonText = ""
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) => { };
+                window.ShowDialog();
                 return;
             }
 
             if (newPassword != confirmNewPassword)
             {
-                MessageBox.Show(LocalizationManager.GetString("PasswordsDoNotMatch"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("Error"),
+                    Message = LocalizationManager.GetString("PasswordsDoNotMatch"),
+                    ConfirmButtonText = LocalizationManager.GetString("OK"),
+                    CancelButtonText = ""
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) => { };
+                window.ShowDialog();
                 return;
             }
 
@@ -127,72 +187,217 @@ namespace ContactManagerApp.Views
             if (string.IsNullOrEmpty(userId))
             {
                 System.Diagnostics.Debug.WriteLine("Change password failed: No valid userId found");
-                MessageBox.Show(LocalizationManager.GetString("UserNotFound") ?? "Користувача не знайдено.", LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("Error"),
+                    Message = LocalizationManager.GetString("UserNotFound"),
+                    ConfirmButtonText = LocalizationManager.GetString("OK"),
+                    CancelButtonText = ""
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) => { };
+                window.ShowDialog();
                 return;
             }
 
             bool passwordChanged = AuthService.ChangePassword(userId, oldPassword, newPassword);
             if (passwordChanged)
             {
-                MessageBox.Show(LocalizationManager.GetString("PasswordChangedSuccess"), "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-                OldPasswordBox.Password = string.Empty;
-                NewPasswordBox.Password = string.Empty;
-                ConfirmNewPasswordBox.Password = string.Empty;
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("Success"),
+                    Message = LocalizationManager.GetString("PasswordChangedSuccess"),
+                    ConfirmButtonText = LocalizationManager.GetString("OK"),
+                    CancelButtonText = ""
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) =>
+                {
+                    OldPasswordBox.Password = string.Empty;
+                    NewPasswordBox.Password = string.Empty;
+                    ConfirmNewPasswordBox.Password = string.Empty;
+                };
+                window.ShowDialog();
             }
             else
             {
-                MessageBox.Show(LocalizationManager.GetString("OldPasswordIncorrect"), LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("Error"),
+                    Message = LocalizationManager.GetString("OldPasswordIncorrect"),
+                    ConfirmButtonText = LocalizationManager.GetString("OK"),
+                    CancelButtonText = ""
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) => { };
+                window.ShowDialog();
             }
         }
 
         private void DeleteAccount_Click(object sender, RoutedEventArgs e)
+{
+    var dialog = new CustomConfirmationDialog
+    {
+        Title = LocalizationManager.GetString("DeleteAccount"),
+        Message = LocalizationManager.GetString("DeleteAccountConfirmation"),
+        ConfirmButtonText = LocalizationManager.GetString("DeleteAccount"),
+        CancelButtonText = LocalizationManager.GetString("Cancel")
+    };
+
+    var window = new Window
+    {
+        AllowsTransparency = true,
+        Content = dialog,
+        SizeToContent = SizeToContent.WidthAndHeight,
+        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+        WindowStyle = WindowStyle.None,
+        ResizeMode = ResizeMode.NoResize,
+        Background = null
+    };
+
+    dialog.DialogResult += (s, result) =>
+    {
+        if (!result)
+            return;
+
+        string userId = _settingService.GetSetting("CurrentUserId") ?? App.CurrentUser?.UserId;
+        System.Diagnostics.Debug.WriteLine($"Attempting to delete account with CurrentUserId: {userId}");
+
+        if (string.IsNullOrEmpty(userId) && App.CurrentUser != null)
         {
-            MessageBoxResult result = MessageBox.Show(
-                LocalizationManager.GetString("DeleteAccountConfirmation"),
-                LocalizationManager.GetString("DeleteAccount"),
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
-
-            if (result != MessageBoxResult.Yes)
-                return;
-
-            string userId = _settingService.GetSetting("CurrentUserId") ?? App.CurrentUser?.UserId;
-            System.Diagnostics.Debug.WriteLine($"Attempting to delete account with CurrentUserId: {userId}");
-
-            if (string.IsNullOrEmpty(userId) && App.CurrentUser != null)
-            {
-                userId = App.CurrentUser.UserId;
-                System.Diagnostics.Debug.WriteLine($"Using App.CurrentUser.UserId as fallback: {userId}");
-            }
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                System.Diagnostics.Debug.WriteLine("Delete account failed: No valid userId found");
-                MessageBox.Show(LocalizationManager.GetString("UserNotFound") ?? "Користувача не знайдено.", LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            bool deleted = AuthService.DeleteAccount(userId);
-            if (deleted)
-            {
-                System.Diagnostics.Debug.WriteLine($"Account deletion successful for UserId: {userId}");
-                _settingService.SetSetting("CurrentUserId", null);
-                _settingService.SetSetting("AuthToken", null);
-                _settingService.SetCurrentUserIdLastUsed(null);
-                _settingService.SetSessionExpiredShown(false);
-                App.CurrentUser = null;
-
-                LoginView loginView = new LoginView();
-                loginView.Show();
-                Window.GetWindow(this)?.Close();
-                MessageBox.Show(LocalizationManager.GetString("DeleteAccountSuccess") ?? "Обліковий запис успішно видалено.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                System.Diagnostics.Debug.WriteLine($"Delete account failed for UserId: {userId}");
-                MessageBox.Show(LocalizationManager.GetString("DeleteAccountFailed") ?? "Не вдалося видалити обліковий запис. Спробуйте ще раз.", LocalizationManager.GetString("Error"), MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            userId = App.CurrentUser.UserId;
+            System.Diagnostics.Debug.WriteLine($"Using App.CurrentUser.UserId as fallback: {userId}");
         }
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            System.Diagnostics.Debug.WriteLine("Delete account failed: No valid userId found");
+            var errorDialog = new CustomConfirmationDialog
+            {
+                Title = LocalizationManager.GetString("Error"),
+                Message = LocalizationManager.GetString("UserNotFound"),
+                ConfirmButtonText = LocalizationManager.GetString("OK"),
+                CancelButtonText = ""
+            };
+
+            var errorWindow = new Window
+            {
+                AllowsTransparency = true,
+                Content = errorDialog,
+                SizeToContent = SizeToContent.WidthAndHeight,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                WindowStyle = WindowStyle.None,
+                ResizeMode = ResizeMode.NoResize,
+                Background = null
+            };
+
+            errorDialog.DialogResult += (s2, result2) => { errorWindow.Close(); };
+            errorWindow.ShowDialog();
+            return;
+        }
+
+        bool deleted = AuthService.DeleteAccount(userId);
+        if (deleted)
+        {
+            System.Diagnostics.Debug.WriteLine($"Account deletion successful for UserId: {userId}");
+            _settingService.SetSetting("CurrentUserId", null);
+            _settingService.SetSetting("AuthToken", null);
+            _settingService.SetCurrentUserIdLastUsed(null);
+            _settingService.SetSessionExpiredShown(false);
+            App.CurrentUser = null;
+
+            // Закриваємо поточне вікно підтвердження перед переходом
+            window.Close();
+
+            // Перехід до AuthView
+            var authView = new AuthView();
+            authView.Show();
+            Window.GetWindow(this)?.Close();
+
+            var successDialog = new CustomConfirmationDialog
+            {
+                Title = LocalizationManager.GetString("Success"),
+                Message = LocalizationManager.GetString("DeleteAccountSuccess"),
+                ConfirmButtonText = LocalizationManager.GetString("OK"),
+                CancelButtonText = ""
+            };
+
+            var successWindow = new Window
+            {
+                AllowsTransparency = true,
+                Content = successDialog,
+                SizeToContent = SizeToContent.WidthAndHeight,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                WindowStyle = WindowStyle.None,
+                ResizeMode = ResizeMode.NoResize,
+                Background = null
+            };
+
+            successDialog.DialogResult += (s2, result2) => { successWindow.Close(); };
+            successWindow.ShowDialog();
+        }
+        else
+        {
+            System.Diagnostics.Debug.WriteLine($"Delete account failed for UserId: {userId}");
+            var errorDialog = new CustomConfirmationDialog
+            {
+                Title = LocalizationManager.GetString("Error"),
+                Message = LocalizationManager.GetString("DeleteAccountFailed"),
+                ConfirmButtonText = LocalizationManager.GetString("OK"),
+                CancelButtonText = ""
+            };
+
+            var errorWindow = new Window
+            {
+                AllowsTransparency = true,
+                Content = errorDialog,
+                SizeToContent = SizeToContent.WidthAndHeight,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                WindowStyle = WindowStyle.None,
+                ResizeMode = ResizeMode.NoResize,
+                Background = null
+            };
+
+            errorDialog.DialogResult += (s2, result2) => { errorWindow.Close(); };
+            errorWindow.ShowDialog();
+        }
+    };
+
+    window.ShowDialog();
+}
 
         private void OnLanguageChanged(object sender, EventArgs e)
         {

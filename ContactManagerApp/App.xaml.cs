@@ -2,6 +2,7 @@
 using System;
 using System.Windows;
 using ContactManagerApp.Models;
+using ContactManagerApp.Views;
 
 namespace ContactManagerApp
 {
@@ -33,6 +34,34 @@ namespace ContactManagerApp
         {
             base.OnStartup(e);
             System.Diagnostics.Debug.WriteLine("Application started");
+
+            // Перевіряємо токен для автоматичного входу
+            string token = SettingStorage.GetSetting("AuthToken");
+            if (!string.IsNullOrEmpty(token))
+            {
+                var user = AuthService.ValidateToken(token);
+                if (user != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Auto-login successful: User {user.Username}, UserId: {user.UserId}");
+                    CurrentUser = user;
+
+                    ThemeManager.ApplyTheme(user.Theme);
+                    System.Diagnostics.Debug.WriteLine($"Applied settings for auto-login: Theme={user.Theme}");
+
+                    var contactService = new ContactService(user.ContactFolderCode);
+                    MainView mainView = new MainView(contactService);
+                    mainView.Show();
+                    return; // Завершуємо метод, щоб не відкривати AuthView
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Auto-login failed: Invalid or expired token");
+                }
+            }
+
+            // Якщо автоматичний вхід не вдався, відкриваємо AuthView
+            AuthView authView = new AuthView();
+            authView.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -51,8 +80,8 @@ namespace ContactManagerApp
                 var user = users.FirstOrDefault(u => u.Token == token && u.IsActive);
                 if (user != null && user.TokenExpiration > DateTime.UtcNow)
                 {
-                    // Встановлюємо TokenExpiration на 5 хвилин після закриття
-                    user.TokenExpiration = DateTime.UtcNow.AddMinutes(10);
+                    // Встановлюємо TokenExpiration на 10 хвилин після закриття
+                    user.TokenExpiration = DateTime.UtcNow.AddSeconds(5);
                     AuthService.SaveUsers(users);
                     System.Diagnostics.Debug.WriteLine($"Updated TokenExpiration to {user.TokenExpiration} for UserId: {user.UserId}");
                 }

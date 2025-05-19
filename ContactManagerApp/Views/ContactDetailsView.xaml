@@ -227,12 +227,15 @@
         <!-- Аватарка -->
         <Grid Grid.Row="1" HorizontalAlignment="Left" Margin="25,10,0,24">
             <!-- Базовий круг (фон для ініціалів або фото) -->
-            <Ellipse Width="160" Height="160">
+            <Ellipse Width="158" Height="158">
                 <Ellipse.Fill>
                     <SolidColorBrush Color="{Binding SelectedContact.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
                 </Ellipse.Fill>
                 <Ellipse.Effect>
-                    <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
+                    <DropShadowEffect Color="{Binding Source={StaticResource ShadowColor}, Path=Color}" 
+                                      BlurRadius="13" 
+                                      ShadowDepth="0" 
+                                      Opacity="0.5"/>
                 </Ellipse.Effect>
             </Ellipse>
             <!-- Фото (якщо є) -->

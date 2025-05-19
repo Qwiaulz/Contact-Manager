@@ -85,7 +85,27 @@ namespace ContactManagerApp.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error uploading photo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    var dialog = new CustomConfirmationDialog
+                    {
+                        Title = LocalizationManager.GetString("Error"),
+                        Message = LocalizationManager.GetString("PhotoUploadError", ex.Message),
+                        ConfirmButtonText = LocalizationManager.GetString("OK"),
+                        CancelButtonText = ""
+                    };
+
+                    var window = new Window
+                    {
+                        AllowsTransparency = true,
+                        Content = dialog,
+                        SizeToContent = SizeToContent.WidthAndHeight,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        WindowStyle = WindowStyle.None,
+                        ResizeMode = ResizeMode.NoResize,
+                        Background = null
+                    };
+
+                    dialog.DialogResult += (s, result) => { };
+                    window.ShowDialog();
                 }
             }
         }
@@ -113,34 +133,68 @@ namespace ContactManagerApp.Views
             if (!_contact.IsDeleted)
             {
                 // М'яке видалення: переносимо до кошика
-                var result = MessageBox.Show(
-                    LocalizationManager.GetString("ConfirmDeleteMessage"),
-                    LocalizationManager.GetString("ConfirmDeleteTitle"),
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
+                var dialog = new CustomConfirmationDialog
                 {
-                    _contactService.MarkAsDeleted(_contact);
-                    _contactService.NotifyContactsChanged();
-                    _navigationService.GoBack();
-                }
+                    Title = LocalizationManager.GetString("ConfirmDeleteTitle"),
+                    Message = LocalizationManager.GetString("ConfirmDeleteMessage"),
+                    ConfirmButtonText = LocalizationManager.GetString("Yes"),
+                    CancelButtonText = LocalizationManager.GetString("No")
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) =>
+                {
+                    if (result)
+                    {
+                        _contactService.MarkAsDeleted(_contact);
+                        _contactService.NotifyContactsChanged();
+                        _navigationService.GoBack();
+                    }
+                };
+                window.ShowDialog();
             }
             else
             {
                 // Остаточне видалення
-                var result = MessageBox.Show(
-                    LocalizationManager.GetString("ConfirmPermanentDeleteMessage") ?? "This contact will be permanently deleted and cannot be restored. Are you sure?",
-                    LocalizationManager.GetString("ConfirmDeleteTitle") ?? "Confirm Deletion",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
+                var dialog = new CustomConfirmationDialog
                 {
-                    _contactService.DeleteContact(_contact);
-                    _contactService.NotifyContactsChanged();
-                    _navigationService.GoBack();
-                }
+                    Title = LocalizationManager.GetString("ConfirmDeleteTitle"),
+                    Message = LocalizationManager.GetString("ConfirmPermanentDeleteMessage"),
+                    ConfirmButtonText = LocalizationManager.GetString("Yes"),
+                    CancelButtonText = LocalizationManager.GetString("No")
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) =>
+                {
+                    if (result)
+                    {
+                        _contactService.DeleteContact(_contact);
+                        _contactService.NotifyContactsChanged();
+                        _navigationService.GoBack();
+                    }
+                };
+                window.ShowDialog();
             }
         }
 

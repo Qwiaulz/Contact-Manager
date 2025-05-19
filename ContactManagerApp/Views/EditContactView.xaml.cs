@@ -139,7 +139,27 @@ namespace ContactManagerApp.Views
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error uploading photo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    var dialog = new CustomConfirmationDialog
+                    {
+                        Title = LocalizationManager.GetString("Error"),
+                        Message = LocalizationManager.GetString("PhotoUploadError", ex.Message),
+                        ConfirmButtonText = LocalizationManager.GetString("OK"),
+                        CancelButtonText = ""
+                    };
+
+                    var window = new Window
+                    {
+                        AllowsTransparency = true,
+                        Content = dialog,
+                        SizeToContent = SizeToContent.WidthAndHeight,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        WindowStyle = WindowStyle.None,
+                        ResizeMode = ResizeMode.NoResize,
+                        Background = null
+                    };
+
+                    dialog.DialogResult += (s, result) => { };
+                    window.ShowDialog();
                 }
             }
         }
@@ -174,7 +194,27 @@ namespace ContactManagerApp.Views
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error deleting photo: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        var dialog = new CustomConfirmationDialog
+                        {
+                            Title = LocalizationManager.GetString("Error"),
+                            Message = LocalizationManager.GetString("PhotoDeleteError", ex.Message),
+                            ConfirmButtonText = LocalizationManager.GetString("OK"),
+                            CancelButtonText = ""
+                        };
+
+                        var window = new Window
+                        {
+                            AllowsTransparency = true,
+                            Content = dialog,
+                            SizeToContent = SizeToContent.WidthAndHeight,
+                            WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                            WindowStyle = WindowStyle.None,
+                            ResizeMode = ResizeMode.NoResize,
+                            Background = null
+                        };
+
+                        dialog.DialogResult += (s, result) => { };
+                        window.ShowDialog();
                         return;
                     }
                 }

@@ -1,0 +1,45 @@
+<UserControl x:Class="ContactManagerApp.Views.CustomConfirmationDialog"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:services1="clr-namespace:ContactManagerApp.Services"
+             mc:Ignorable="d"
+             d:DesignHeight="150" d:DesignWidth="400">
+    <Border Background="{DynamicResource ControlBackground}" CornerRadius="10" Padding="20,15,20,15" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ClipToBounds="True">
+        <StackPanel>
+            <TextBlock x:Name="TitleText" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TextColor}" Margin="0,0,0,10"
+                       Text="{Binding Title, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <TextBlock x:Name="MessageText" FontSize="14" Foreground="{DynamicResource TextColor}" TextWrapping="Wrap" Margin="0,0,0,20"
+                       Text="{Binding Message, RelativeSource={RelativeSource AncestorType=UserControl}}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="CancelButton" Content="{Binding CancelButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                        Click="CancelButton_Click" Margin="0,0,10,0">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CancelButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button x:Name="ConfirmButton" Content="{Binding ConfirmButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                        Click="ConfirmButton_Click">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource ActionButtonStyle}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ConfirmButtonText, RelativeSource={RelativeSource AncestorType=UserControl}}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>

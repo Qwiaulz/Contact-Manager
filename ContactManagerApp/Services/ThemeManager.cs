@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using ContactManagerApp.Views;
 
 namespace ContactManagerApp.Services
 {
@@ -35,7 +36,27 @@ namespace ContactManagerApp.Services
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Помилка при застосуванні теми: {ex.Message}", "Помилка", MessageBoxButton.OK, MessageBoxImage.Error);
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("Error"),
+                    Message = LocalizationManager.GetString("ThemeApplicationError", ex.Message),
+                    ConfirmButtonText = LocalizationManager.GetString("OK"),
+                    CancelButtonText = ""
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) => { };
+                window.ShowDialog();
             }
         }
     }

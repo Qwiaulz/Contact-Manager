@@ -296,108 +296,116 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
+        
         <!-- Стиль для ComboBox -->
-        <Style x:Key="DefaultComboBoxStyle" TargetType="ComboBox">
-            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
-            <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
-            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="8"/>
-            <Setter Property="Margin" Value="0,10,0,15"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Grid>
-                            <ToggleButton x:Name="ToggleButton" 
-                                          Background="{TemplateBinding Background}"
-                                          BorderBrush="{TemplateBinding BorderBrush}"
-                                          BorderThickness="{TemplateBinding BorderThickness}"
-                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                          ClickMode="Press">
-                                <ToggleButton.Content>
-                                    <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
-                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                                      ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                                      Margin="3,3,23,3"
-                                                      VerticalAlignment="Center"
-                                                      HorizontalAlignment="Left"/>
-                                </ToggleButton.Content>
-                                <ToggleButton.Style>
-                                    <Style TargetType="ToggleButton">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="ToggleButton">
-                                                    <Grid>
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="*"/>
-                                                            <ColumnDefinition Width="20"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Border Grid.Column="0" Background="{TemplateBinding Background}"
-                                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                                CornerRadius="5"/>
-                                                        <Border Grid.Column="1" Background="{TemplateBinding Background}"
-                                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                                CornerRadius="5"/>
-                                                        <Path x:Name="Arrow" Grid.Column="1" Fill="{DynamicResource TextColor}" 
-                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                              Data="M 0 0 L 4 4 L 8 0 Z"/>
-                                                    </Grid>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ToggleButton.Style>
-                            </ToggleButton>
-                            <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
-                                              Content="{TemplateBinding SelectionBoxItem}"
-                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                              Margin="13,3,23,3"
-                                              VerticalAlignment="Center"
-                                              HorizontalAlignment="Left"/>
-                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
-                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
-                                <Grid x:Name="DropDown" SnapsToDevicePixels="True" 
-                                      MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200">
-                                    <Border x:Name="DropDownBorder" Background="{DynamicResource ControlBackground}" 
-                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"/>
-                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
-                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
-                                    </ScrollViewer>
-                                </Grid>
-                            </Popup>
+<Style x:Key="DefaultComboBoxStyle" TargetType="ComboBox">
+    <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+    <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
+    <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="Padding" Value="8"/>
+    <Setter Property="Margin" Value="0,10,0,15"/>
+    <Setter Property="Height" Value="40"/>
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="ComboBox">
+                <Grid>
+                    <ToggleButton x:Name="ToggleButton" 
+                                  Background="{TemplateBinding Background}"
+                                  BorderBrush="{TemplateBinding BorderBrush}"
+                                  BorderThickness="{TemplateBinding BorderThickness}"
+                                  IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                  ClickMode="Press">
+                        <ToggleButton.Content>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="30"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- Основний вміст -->
+                                <ContentPresenter Grid.Column="0"
+                                                  Content="{TemplateBinding SelectionBoxItem}"
+                                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                  Margin="5,3,0,3"
+                                                  VerticalAlignment="Center"
+                                                  HorizontalAlignment="Left"
+                                                  TextElement.Foreground="{DynamicResource TextColor}"/>
+                                <!-- Стрілка -->
+                                <Path x:Name="Arrow" Grid.Column="1" Fill="{DynamicResource TextColor}" 
+                                      HorizontalAlignment="Center" VerticalAlignment="Center"
+                                      Data="M 0 0 L 4.5 4.5 L 9 0 Z"/>
+                            </Grid>
+                        </ToggleButton.Content>
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border Background="{TemplateBinding Background}"
+                                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                                    CornerRadius="5">
+                                                <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#0078D4"/>
+                                                </Trigger>
+                                                <Trigger Property="IsChecked" Value="True">
+                                                    <Setter Property="BorderBrush" Value="#0078D4"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ToggleButton.Style>
+                    </ToggleButton>
+                    <!-- Видаляємо ContentSite, щоб уникнути накладання -->
+                    <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
+                           AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                        <Grid x:Name="DropDown" SnapsToDevicePixels="True" 
+                              MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200">
+                            <Border x:Name="DropDownBorder" Background="{DynamicResource ControlBackground}" 
+                                    BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"/>
+                            <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                            </ScrollViewer>
                         </Grid>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+                    </Popup>
+                </Grid>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
 
-        <!-- Стиль для елементів ComboBox -->
-        <Style TargetType="ComboBoxItem">
-            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
-            <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
-            <Setter Property="Padding" Value="5"/>
-            <Setter Property="FontSize" Value="16"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBoxItem">
-                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter/>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <Trigger Property="IsHighlighted" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
-                </Trigger>
-            </Style.Triggers>
-        </Style>
+<!-- Стиль для елементів ComboBox -->
+<Style TargetType="ComboBoxItem">
+    <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+    <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
+    <Setter Property="Padding" Value="5"/>
+    <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="ComboBoxItem">
+                <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                    <ContentPresenter TextElement.Foreground="{DynamicResource TextColor}"/>
+                </Border>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+        <Trigger Property="IsHighlighted" Value="True">
+            <Setter Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+            <Setter Property="Foreground" Value="{DynamicResource ButtonActiveTextForeground}"/>
+        </Trigger>
+        <Trigger Property="IsSelected" Value="True">
+            <Setter Property="Foreground" Value="{DynamicResource ButtonActiveTextForeground}"/>
+        </Trigger>
+    </Style.Triggers>
+</Style>
         
         <!-- Стиль для пунктів контекстного меню -->
         <Style x:Key="ContextMenuItemStyle" TargetType="MenuItem">
@@ -476,7 +484,7 @@
                             <SolidColorBrush Color="{Binding EditedContact.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
                         </Ellipse.Fill>
                         <Ellipse.Effect>
-                            <DropShadowEffect Color="{DynamicResource ShadowColor}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
+                            <DropShadowEffect Color="{Binding Source={StaticResource ShadowColor}, Path=Color}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
                         </Ellipse.Effect>
                     </Ellipse>
                     <!-- Фото (якщо є) -->
@@ -565,7 +573,7 @@
 
                 <!-- Телефони -->
                 <StackPanel Margin="0,40,0,0">
-                    <TextBlock Margin="0,10,0,-30" Style="{StaticResource IconStyle}" Text=""/>
+                    <TextBlock Margin="0,10,0,-40" Style="{StaticResource IconStyle}" Text=""/>
                     <TextBlock Margin="50,-20,0,-20" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                               Converter={StaticResource LocalizationConverter}, 
                                               ConverterParameter=Phone}"/>
@@ -598,7 +606,7 @@
 
                 <!-- Ел. пошта -->
                 <StackPanel Margin="0,40,0,0">
-                    <TextBlock Margin="0,10,0,-30" Style="{StaticResource IconStyle}" Text=""/>
+                    <TextBlock Margin="0,10,0,-40" Style="{StaticResource IconStyle}" Text=""/>
                     <TextBlock Margin="50,-20,0,-30" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                               Converter={StaticResource LocalizationConverter}, 
                                               ConverterParameter=Email}"/>

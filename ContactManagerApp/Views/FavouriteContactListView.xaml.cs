@@ -4,6 +4,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -215,18 +216,38 @@ namespace ContactManagerApp.Views
         {
             if (contact != null && !contact.IsDeleted)
             {
-                var result = MessageBox.Show(
-                    LocalizationManager.GetString("ConfirmDeleteMessage"),
-                    LocalizationManager.GetString("ConfirmDeleteTitle"),
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
+                var dialog = new CustomConfirmationDialog
                 {
-                    _contactService.MarkAsDeleted(contact);
-                    _favouriteContactsViewSource.View.Refresh();
-                    UpdateFilteredFavouriteContactsCount();
-                }
+                    Title = LocalizationManager.GetString("DeleteContactTitle"),
+                    Message = LocalizationManager.GetString("DeleteContactMessage"),
+                    ConfirmButtonText = LocalizationManager.GetString("MoveToBasket"),
+                    CancelButtonText = LocalizationManager.GetString("Cancel")
+                };
+
+                Debug.WriteLine($"Title: {dialog.Title}, Message: {dialog.Message}, Confirm: {dialog.ConfirmButtonText}, Cancel: {dialog.CancelButtonText}");
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) =>
+                {
+                    if (result)
+                    {
+                        _contactService.MarkAsDeleted(contact);
+                        _favouriteContactsViewSource.View.Refresh();
+                        UpdateFilteredFavouriteContactsCount();
+                    }
+                };
+
+                window.ShowDialog();
             }
         }
 
@@ -246,25 +267,43 @@ namespace ContactManagerApp.Views
             var contactsToDelete = SelectedContacts.ToList();
             if (contactsToDelete.Any())
             {
-                var result = MessageBox.Show(
-                    LocalizationManager.GetString("ConfirmDeleteMessage"),
-                    LocalizationManager.GetString("ConfirmDeleteTitle"),
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
+                var dialog = new CustomConfirmationDialog
                 {
-                    foreach (var contact in contactsToDelete)
+                    Title = LocalizationManager.GetString("DeleteContactTitle"),
+                    Message = LocalizationManager.GetString("DeleteContactMessage"),
+                    ConfirmButtonText = LocalizationManager.GetString("MoveToBasket"),
+                    CancelButtonText = LocalizationManager.GetString("Cancel")
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) =>
+                {
+                    if (result)
                     {
-                        if (!contact.IsDeleted)
+                        foreach (var contact in contactsToDelete)
                         {
-                            _contactService.MarkAsDeleted(contact);
+                            if (!contact.IsDeleted)
+                            {
+                                _contactService.MarkAsDeleted(contact);
+                            }
                         }
+                        SelectedContacts.Clear();
+                        _favouriteContactsViewSource.View.Refresh();
+                        UpdateFilteredFavouriteContactsCount();
                     }
-                    SelectedContacts.Clear();
-                    _favouriteContactsViewSource.View.Refresh();
-                    UpdateFilteredFavouriteContactsCount();
-                }
+                };
+
+                window.ShowDialog();
             }
         }
 

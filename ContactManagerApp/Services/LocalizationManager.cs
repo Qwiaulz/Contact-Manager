@@ -13,33 +13,6 @@ namespace ContactManagerApp.Services
         private string _currentLanguage = "uk";
         private readonly Dictionary<string, Dictionary<string, string>> _translations;
 
-        // Ключі, які завжди повертають англійські переклади (для LoginView і RegistrationView)
-        private static readonly HashSet<string> _englishOnlyKeys = new HashSet<string>
-        {
-            "Welcome",
-            "Username",
-            "Password",
-            "RememberMe",
-            "LoginButton",
-            "NoAccountPrompt",
-            "SignUpButton",
-            "EmptyFieldsError",
-            "UserIdEmptyError",
-            "LoginSuccess",
-            "InvalidCredentialsError",
-            "CreateAccount",
-            "RegisterButton",
-            "AlreadyHaveAccount",
-            "SignInButton",
-            "AllFieldsRequired",
-            "PasswordMinLength",
-            "UserExistsError",
-            "RegistrationSuccess",
-            "LoginAfterRegistrationError",
-            "RegistrationFailed",
-            "Error"
-        };
-
         public event PropertyChangedEventHandler PropertyChanged;
         public static event EventHandler LanguageChanged;
 
@@ -82,7 +55,7 @@ namespace ContactManagerApp.Services
                     ["UserExistsError"] = "Користувач з таким логіном уже існує",
                     ["InvalidCredentialsError"] = "Неправильний логін або пароль",
                     ["Language"] = "Мова",
-                    ["DeleteAccountSuccess"] = "Delete account success",
+                    ["DeleteAccountSuccess"] = "Акаунт успішно видалено",
                     ["Theme"] = "Тема",
                     ["LightTheme"] = "Світла тема",
                     ["DarkTheme"] = "Темна тема",
@@ -107,8 +80,8 @@ namespace ContactManagerApp.Services
                     ["Relationship"] = "Зв’язок",
                     ["CustomField"] = "Спеціальне поле",
                     ["Notes"] = "Примітки",
-                    ["AddPhoneNumber"] = "+ Додати номер телефону",
-                    ["AddEmail"] = "+ Додати ел. пошту",
+                    ["AddPhoneNumber"] = " Додати номер телефону",
+                    ["AddEmail"] = " Додати ел. пошту",
                     ["Phone"] = "Телефон",
                     ["Initials"] = "Ініціали",
                     ["Labels"] = "Мітки",
@@ -188,7 +161,49 @@ namespace ContactManagerApp.Services
                     ["OldPasswordIncorrect"] = "Старий пароль введено неправильно.",
                     ["PasswordChangedSuccess"] = "Пароль успішно змінено!",
                     ["DeleteAccountFailed"] = "Не вдалося видалити акаунт.",
-                    ["Logout"] = "Вихід"
+                    ["Logout"] = "Вихід",
+                    ["ConfirmDeleteTitle"] = "Підтвердження видалення",
+                    ["ConfirmDeleteMessage"] = "Видалити з контактів?",
+                    ["ConfirmMoveToBasketMessage"] = "Цей контакт буде видалено з списку контактів і буде переміщено в кошик.",
+                    ["MoveToBasket"] = "Перемістити в кошик",
+                    ["Cancel"] = "Скасувати",
+                    ["FavouriteConfirmDeleteTitle"] = "Видалити з улюблених?",
+                    ["FavouriteConfirmDeleteMessage"] = "Цей контакт буде видалено з улюблених і переміщено в кошик.",
+                    ["DeleteContactTitle"] = "Видалити з контактів?",
+                    ["DeleteContactMessage"] = "Цей контакт буде переміщено в кошик з можливістю подальшого відновлення.",
+                    ["PermanentlyDeleteTitle"] = "Видалити назавжди?",
+                    ["PermanentlyDeleteMessage"] = "Цю дію не можна скасувати",
+                    ["Welcome"] = "Ласкаво просимо",
+                    ["Username"] = "Ім'я користувача",
+                    ["Password"] = "Пароль",
+                    ["RememberMe"] = "Запам’ятати мене",
+                    ["LoginButton"] = "Увійти",
+                    ["NoAccountPrompt"] = "Ще немає акаунта?",
+                    ["SignUpButton"] = "Зареєструватися",
+                    ["EmptyFieldsError"] = "Усі поля обов’язкові.",
+                    ["UserIdEmptyError"] = "Помилка: UserId порожній",
+                    ["LoginSuccess"] = "Успішний вхід!",
+                    ["InvalidCredentialsError"] = "Неправильний логін або пароль",
+                    ["CreateAccount"] = "Створити акаунт",
+                    ["RegisterButton"] = "Зареєструватися",
+                    ["AlreadyHaveAccount"] = "Вже маєте акаунт?",
+                    ["SignInButton"] = "Увійти",
+                    ["LoginAfterRegistrationError"] = "Помилка: Не вдалося увійти після реєстрації",
+                    ["RegistrationSuccess"] = "Реєстрація успішна!",
+                    ["RegistrationFailed"] = "Реєстрація не вдалася. Спробуйте ще раз.",
+                    ["OK"] = "Гаразд",
+                    ["Success"] = "Успіх",
+                    ["ThemeApplicationError"] = "Помилка при застосуванні теми: {0}",
+                    ["PhotoUploadError"] = "Помилка завантаження фото: {0}",
+                    ["Yes"] = "Так",
+                    ["No"] = "Ні",
+                    ["PhotoDeleteError"] = "Помилка видалення фото: {0}",
+                    ["TempPhotoDeleteError"] = "Помилка видалення тимчасового фото: {0}",
+                    ["SearchPlaceholder"] = "Пошук",
+                    ["LogoutConfirmationTitle"] = "Вийти з акаунта?",
+                    ["LogoutConfirmationMessage"] = "Ви впевнені, що хочете завершити сеанс?",
+                    ["SessionExpired"] = "Ваша сесія закінчилася. Введіть пароль для продовження.",
+                    ["UserIdEmptyError"] = "Помилка: UserId порожній",
                 },
                 ["en"] = new Dictionary<string, string>
                 {
@@ -318,7 +333,17 @@ namespace ContactManagerApp.Services
                     ["PasswordChangedSuccess"] = "Password changed successfully!",
                     ["DeleteAccountFailed"] = "Failed to delete account.",
                     ["Logout"] = "Logout",
-                    // Додаткові ключі для LoginView і RegistrationView (тільки англійська)
+                    ["ConfirmDeleteTitle"] = "Confirm Deletion",
+                    ["ConfirmDeleteMessage"] = "Remove from contacts?",
+                    ["ConfirmMoveToBasketMessage"] = "This contact will be removed from the contact list and moved to the trash.",
+                    ["MoveToBasket"] = "Move to Trash",
+                    ["Cancel"] = "Cancel",
+                    ["FavouriteConfirmDeleteTitle"] = "Remove from Favorites?",
+                    ["FavouriteConfirmDeleteMessage"] = "This contact will be removed from favorites and moved to the trash.",
+                    ["DeleteContactTitle"] = "Remove from Contacts?",
+                    ["DeleteContactMessage"] = "This contact will be moved to the trash with the option to restore later.",
+                    ["PermanentlyDeleteTitle"] = "Delete Permanently?",
+                    ["PermanentlyDeleteMessage"] = "This action cannot be undone",
                     ["Welcome"] = "Welcome",
                     ["Username"] = "Username",
                     ["Password"] = "Password",
@@ -335,15 +360,27 @@ namespace ContactManagerApp.Services
                     ["SignInButton"] = "Sign in",
                     ["LoginAfterRegistrationError"] = "Error: Failed to log in after registration",
                     ["RegistrationSuccess"] = "Registration successful!",
-                    ["RegistrationFailed"] = "Registration failed. Please try again."
+                    ["RegistrationFailed"] = "Registration failed. Please try again.",
+                    ["OK"] = "OK",
+                    ["Success"] = "Success",
+                    ["ThemeApplicationError"] = "Error applying theme: {0}",
+                    ["PhotoUploadError"] = "Error uploading photo: {0}",
+                    ["Yes"] = "Yes",
+                    ["No"] = "No",
+                    ["PhotoDeleteError"] = "Error deleting photo: {0}",
+                    ["TempPhotoDeleteError"] = "Error deleting temporary photo: {0}",
+                    ["SearchPlaceholder"] = "Search",
+                    ["LogoutConfirmationTitle"] = "Log Out?",
+                    ["LogoutConfirmationMessage"] = "Are you sure you want to end your session?",
+                    ["SessionExpired"] = "Your session has expired. Please enter your password to continue.",
+                    ["UserIdEmptyError"] = "Error: UserId is empty",
                 }
             };
         }
 
         public static string GetString(string key, params object[] args)
         {
-            // Якщо ключ належить до англійських вікон (LoginView або RegistrationView), завжди повертаємо англійський переклад
-            string language = _englishOnlyKeys.Contains(key) ? "en" : _instance._currentLanguage;
+            string language = _instance._currentLanguage;
 
             if (_instance._translations.TryGetValue(language, out var languageDict) &&
                 languageDict.TryGetValue(key, out var value))

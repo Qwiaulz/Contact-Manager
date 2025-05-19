@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 
 namespace ContactManagerApp.Views
 {
@@ -32,35 +33,28 @@ namespace ContactManagerApp.Views
             }
         }
 
-        public MainView(ContactService contactService
-
-)
+        public MainView(ContactService contactService)
         {
             InitializeComponent();
             _contactService = contactService ?? throw new ArgumentNullException(nameof(contactService));
 
-            // Перевіряємо App.CurrentUser
             if (App.CurrentUser == null)
             {
                 System.Diagnostics.Debug.WriteLine("Error: App.CurrentUser is null in MainView");
                 Close();
-                var loginView = new LoginView();
-                loginView.Show();
+                var authView = new AuthView();
+                authView.Show();
                 return;
             }
             
-            // Використовуємо MainFrame із XAML
             _navigationService = new NavigationService(MainFrame);
 
-            // Відкриваємо сторінку "Контакти" за замовчуванням
             _navigationService.Navigate(new ContactListView(_navigationService, _contactService));
 
-            // Встановлюємо фокус на ContactsButton
             ContactsButton.Focus();
 
             UpdateSidebarState();
 
-            // Підписка на зміну мови
             LocalizationManager.LanguageChanged += OnLanguageChanged;
         }
 
@@ -113,7 +107,17 @@ namespace ContactManagerApp.Views
 
         private void UpdateSidebarState()
         {
-            SidebarColumn.Width = new GridLength(IsSidebarCollapsed ? CollapsedSidebarWidth : FullSidebarWidth);
+            var expandAnimation = (Storyboard)FindResource("ExpandSidebarAnimation");
+            var collapseAnimation = (Storyboard)FindResource("CollapseSidebarAnimation");
+
+            if (IsSidebarCollapsed)
+            {
+                collapseAnimation.Begin();
+            }
+            else
+            {
+                expandAnimation.Begin();
+            }
         }
 
         private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -165,16 +169,43 @@ namespace ContactManagerApp.Views
 
         private void LogoutButton_Click(object sender, RoutedEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine($"Logging out: UserId={(App.CurrentUser != null ? App.CurrentUser.UserId : "null")}");
-            App.SettingStorage.SetSetting("AuthToken", null);
-            App.SettingStorage.SetSetting("CurrentUserId", null);
-            App.SettingStorage.SetCurrentUserIdLastUsed(null);
-            App.SettingStorage.SetSessionExpiredShown(false);
-            App.SettingStorage.SetAppLastClosed(null);
-            App.CurrentUser = null;
-            LoginView loginView = new LoginView();
-            loginView.Show();
-            Close();
+            var dialog = new CustomConfirmationDialog
+            {
+                Title = LocalizationManager.GetString("LogoutConfirmationTitle"),
+                Message = LocalizationManager.GetString("LogoutConfirmationMessage"),
+                ConfirmButtonText = LocalizationManager.GetString("Yes"),
+                CancelButtonText = LocalizationManager.GetString("No")
+            };
+
+            var window = new Window
+            {
+                AllowsTransparency = true,
+                Content = dialog,
+                SizeToContent = SizeToContent.WidthAndHeight,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                WindowStyle = WindowStyle.None,
+                ResizeMode = ResizeMode.NoResize,
+                Background = null
+            };
+
+            dialog.DialogResult += (s, result) =>
+            {
+                if (result)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Logging out: UserId={(App.CurrentUser != null ? App.CurrentUser.UserId : "null")}");
+                    App.SettingStorage.SetSetting("AuthToken", null);
+                    App.SettingStorage.SetSetting("CurrentUserId", null);
+                    App.SettingStorage.SetCurrentUserIdLastUsed(null);
+                    App.SettingStorage.SetSessionExpiredShown(false);
+                    App.SettingStorage.SetAppLastClosed(null);
+                    App.CurrentUser = null;
+                    AuthView authView = new AuthView();
+                    authView.Show();
+                    Close();
+                }
+            };
+
+            window.ShowDialog();
         }
 
         private void LogoButton_Click(object sender, RoutedEventArgs e)
