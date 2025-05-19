@@ -59,6 +59,8 @@ Contact-Manager/
 │   ├── AssemblyInfo.cs                    # Assembly metadata
 │
 │   ├── Assets/                            # Static resources
+│   │   ├── default_photo.png
+│   │   ├── icon.ico
 │
 │   ├── Converters/                        # Value converters for XAML
 │   │   ├── BooleanToVisibilityConverter.cs
@@ -67,13 +69,15 @@ Contact-Manager/
 │   │   ├── InverseBooleanToVisibilityConverter.cs
 │   │   ├── IsNullOrEmptyConverter.cs
 │   │   ├── LocalizationConverter.cs
-│   │   └── LocalizedDateConverter.cs
+│   │   ├── LocalizedDateConverter.cs
+│   │   ├── PhotoVisibilityConverter.cs
+│   │   └── StringToVisibilityConverter.cs
 │
 │   ├── Data/                              # Data files and photos
-│   │   ├── contacts.json
-│   │   ├── settings.json
-│   │   └── users.json
-│   │   └── Photos/                        # Placeholder and contact images
+│   │   ├── Contacts/
+│   │   ├── Photos/                        # Placeholder and contact images
+│   │   ├── Settings/
+│   │   └── Users/                        
 │
 │   ├── Models/                            # Data models
 │   │   ├── Contact.cs
@@ -95,10 +99,14 @@ Contact-Manager/
 │   ├── Views/                             # UI views and code-behind files
 │   │   ├── AddContactView.xaml
 │   │   ├── AddContactView.xaml.cs
+│   │   ├── AuthView.xaml
+│   │   ├── AuthView.xaml.cs
 │   │   ├── ContactDetailsView.xaml
 │   │   ├── ContactDetailsView.xaml.cs
 │   │   ├── ContactListView.xaml
 │   │   ├── ContactListView.xaml.cs
+│   │   ├── CustomConfirmationDialog.xaml
+│   │   ├── CustomConfirmationDialog.xaml.cs
 │   │   ├── EditContactView.xaml
 │   │   ├── EditContactView.xaml.cs
 │   │   ├── FavouriteContactListView.xaml
