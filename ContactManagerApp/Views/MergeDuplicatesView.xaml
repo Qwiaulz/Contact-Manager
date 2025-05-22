@@ -47,6 +47,7 @@
             <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}"/>
             <Setter Property="Padding" Value="20,5"/>
             <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -75,6 +76,7 @@
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonBackground}"/>
             <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -102,6 +104,7 @@
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonForeground}"/>
             <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -122,6 +125,7 @@
             <Setter Property="FontWeight" Value="Medium"/>
             <Setter Property="Foreground" Value="#FF4444"/>
             <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -139,6 +143,7 @@
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Margin" Value="20,10"/>
             <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+            <Setter Property="Cursor" Value="Hand"/>
         </Style>
 
         <!-- Стиль для елементів списку -->
@@ -212,57 +217,53 @@
                                                 </Grid.ColumnDefinitions>
 
                                                 <!-- Аватарка -->
-                                                <Grid Grid.Column="0" Width="45" Height="45" Margin="0,0,10,0">
-                                                    <Grid.Effect>
-                                                        <DropShadowEffect ShadowDepth="0" BlurRadius="5" Opacity="0.2" 
-                                                                          Color="{Binding Source={StaticResource ShadowColor}, Path=Color}"/>
-                                                    </Grid.Effect>
-                                                    <!-- Базовий круг (фон для ініціалів) -->
-                                                    <Ellipse Width="40" Height="40" Fill="{Binding Initials, Converter={StaticResource InitialsToColorConverter}}"/>
-                                                    <!-- Ініціали (показуються, якщо фото немає або це дефолтне фото) -->
-                                                    <TextBlock Text="{Binding Initials}" 
-                                                               FontSize="20" 
-                                                               FontWeight="Bold"
-                                                               Foreground="White" 
-                                                               HorizontalAlignment="Center" 
-                                                               VerticalAlignment="Center">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Visibility" Value="Collapsed"/>
-                                                                <Style.Triggers>
-                                                                    <!-- Показуємо ініціали, якщо фото немає -->
-                                                                    <DataTrigger Binding="{Binding Photo, Converter={StaticResource IsNullOrEmptyConverter}}" Value="True">
-                                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                                    </DataTrigger>
-                                                                    <!-- Показуємо ініціали, якщо фото є дефолтним -->
-                                                                    <DataTrigger Binding="{Binding IsPhotoDefault}" Value="True">
-                                                                        <Setter Property="Visibility" Value="Visible"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
-                                                    <!-- Фото (якщо є) -->
-                                                    <Ellipse Width="45" Height="45">
-                                                        <Ellipse.Fill>
-                                                            <ImageBrush ImageSource="{Binding Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
-                                                        </Ellipse.Fill>
-                                                        <Ellipse.Clip>
-                                                            <EllipseGeometry RadiusX="22.5" RadiusY="22.5" Center="22.5,22.5"/>
-                                                        </Ellipse.Clip>
-                                                        <!-- Ховаємо фото, якщо воно відсутнє -->
-                                                        <Ellipse.Style>
-                                                            <Style TargetType="Ellipse">
-                                                                <Setter Property="Visibility" Value="Visible"/>
-                                                                <Style.Triggers>
-                                                                    <DataTrigger Binding="{Binding Photo, Converter={StaticResource IsNullOrEmptyConverter}}" Value="True">
-                                                                        <Setter Property="Visibility" Value="Collapsed"/>
-                                                                    </DataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </Ellipse.Style>
-                                                    </Ellipse>
-                                                </Grid>
+                                            <Grid Grid.Column="0" Width="50" Height="50" Margin="0,0,10,0">
+                                                <!-- Базовий круг (фон для ініціалів) -->
+                                                <Ellipse Width="48" Height="48" Fill="{Binding Initials, Converter={StaticResource InitialsToColorConverter}}"/>
+                                                <!-- Ініціали (показуються, якщо фото немає або це дефолтне фото) -->
+                                                <TextBlock Text="{Binding Initials}" 
+                                                           FontSize="20" 
+                                                           FontWeight="Bold"
+                                                           Foreground="White" 
+                                                           HorizontalAlignment="Center" 
+                                                           VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                                            <Style.Triggers>
+                                                                <!-- Показуємо ініціали, якщо фото немає -->
+                                                                <DataTrigger Binding="{Binding Photo, Converter={StaticResource IsNullOrEmptyConverter}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                                <!-- Показуємо ініціали, якщо фото є дефолтним -->
+                                                                <DataTrigger Binding="{Binding IsPhotoDefault}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <!-- Фото (якщо є) -->
+                                                <Ellipse Width="50" Height="50">
+                                                    <Ellipse.Fill>
+                                                        <ImageBrush ImageSource="{Binding Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
+                                                    </Ellipse.Fill>
+                                                    <Ellipse.Clip>
+                                                        <EllipseGeometry RadiusX="25" RadiusY="25" Center="25,25"/>
+                                                    </Ellipse.Clip>
+                                                    <!-- Ховаємо фото, якщо воно відсутнє -->
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Photo, Converter={StaticResource IsNullOrEmptyConverter}}" Value="True">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                            </Grid>
 
                                                 <!-- Інформація -->
                                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">

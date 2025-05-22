@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.IO;
 
 namespace ContactManagerApp.Views
 {
@@ -23,13 +24,13 @@ namespace ContactManagerApp.Views
         public ObservableCollection<ComboBoxItemModel> SelectionActions { get; set; }
         private readonly CollectionViewSource _trashContactsViewSource;
         private string _searchQuery;
+        private bool _isUpdating; // Прапор для уникнення подвійного оновлення
 
         public ICommand RestoreContactCommand { get; }
         public ICommand RestoreSelectedContactsCommand { get; }
         public ICommand PermanentlyDeleteSelectedContactsCommand { get; }
         public ICommand ClearSelectionCommand { get; }
 
-        // Визначаємо DependencyProperty для FilteredTrashContactsCount
         public static readonly DependencyProperty FilteredTrashContactsCountProperty =
             DependencyProperty.Register(
                 nameof(FilteredTrashContactsCount),
@@ -53,6 +54,8 @@ namespace ContactManagerApp.Views
             foreach (var contact in Contacts)
             {
                 contact.Initialize();
+                CheckPhotoExistence(contact, false); // Не оновлюємо ContactService під час ініціалізації
+                contact.PropertyChanged += Contact_PropertyChanged;
             }
             SelectedContacts = new ObservableCollection<Contact>();
             TrashContacts = new ObservableCollection<Contact>();
@@ -75,46 +78,143 @@ namespace ContactManagerApp.Views
             DataContext = this;
             SelectionComboBox.ItemsSource = SelectionActions;
 
-            _contactService.ContactsChanged += (s, e) =>
-            {
-                Contacts.Clear();
-                foreach (var contact in _contactService.GetAllContacts())
-                {
-                    Contacts.Add(contact);
-                    contact.Initialize();
-                }
-                _trashContactsViewSource.View.Refresh();
-                UpdateFilteredTrashContactsCount();
-
-                DataContext = null;
-                DataContext = this;
-            };
+            _contactService.ContactsChanged += OnContactsChanged;
 
             LocalizationManager.LanguageChanged += OnLanguageChanged;
             SelectedContacts.CollectionChanged += SelectedContacts_CollectionChanged;
 
-            foreach (var contact in Contacts)
-            {
-                contact.PropertyChanged += Contact_PropertyChanged;
-            }
-
             ClearSelection(null);
 
-            _navigationService.GetFrame().Navigated += (s, e) =>
-            {
-                if (e.Content != this)
-                {
-                    ClearSelection(null);
-                }
-            };
+            _navigationService.GetFrame().Navigated += OnNavigated;
 
             ((INotifyCollectionChanged)_trashContactsViewSource.View).CollectionChanged += (s, e) =>
             {
                 UpdateFilteredTrashContactsCount();
             };
 
-            // Початкове оновлення лічильника
             UpdateFilteredTrashContactsCount();
+        }
+
+        private void OnNavigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+            if (e.Content == this)
+            {
+                if (_isUpdating) return; // Уникаємо повторного оновлення
+                _isUpdating = true;
+
+                try
+                {
+                    // Оновлюємо список, уникаючи дублювання
+                    var updatedContacts = _contactService.GetAllContacts().ToList();
+                    Contacts.Clear();
+                    foreach (var updatedContact in updatedContacts)
+                    {
+                        var existingContact = Contacts.FirstOrDefault(c => c.Id == updatedContact.Id);
+                        if (existingContact != null)
+                        {
+                            // Оновлюємо існуючий контакт
+                            existingContact.Name = updatedContact.Name;
+                            existingContact.Photo = updatedContact.Photo;
+                            existingContact.IsPhotoDefault = updatedContact.IsPhotoDefault;
+                            existingContact.IsDeleted = updatedContact.IsDeleted;
+                            existingContact.DeletionDate = updatedContact.DeletionDate;
+                            CheckPhotoExistence(existingContact, false); // Не оновлюємо ContactService тут
+                        }
+                        else
+                        {
+                            // Додаємо новий контакт
+                            updatedContact.Initialize();
+                            CheckPhotoExistence(updatedContact, false);
+                            updatedContact.PropertyChanged += Contact_PropertyChanged;
+                            Contacts.Add(updatedContact);
+                        }
+                    }
+
+                    // Після перевірки всіх контактів оновлюємо ContactService
+                    foreach (var contact in Contacts)
+                    {
+                        if (contact.IsPhotoDefault != updatedContacts.First(c => c.Id == contact.Id).IsPhotoDefault ||
+                            contact.Photo != updatedContacts.First(c => c.Id == contact.Id).Photo)
+                        {
+                            _contactService.UpdateContact(contact);
+                        }
+                    }
+
+                    _trashContactsViewSource.View.Refresh();
+                    UpdateFilteredTrashContactsCount();
+
+                    // Оновлюємо DataContext
+                    DataContext = null;
+                    DataContext = this;
+                }
+                finally
+                {
+                    _isUpdating = false;
+                }
+            }
+            else
+            {
+                ClearSelection(null);
+            }
+        }
+
+        private void OnContactsChanged(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(() =>
+            {
+                if (_isUpdating) return; // Уникаємо повторного оновлення
+                _isUpdating = true;
+
+                try
+                {
+                    // Оновлюємо список, уникаючи дублювання
+                    var updatedContacts = _contactService.GetAllContacts().ToList();
+                    Contacts.Clear();
+                    foreach (var updatedContact in updatedContacts)
+                    {
+                        var existingContact = Contacts.FirstOrDefault(c => c.Id == updatedContact.Id);
+                        if (existingContact != null)
+                        {
+                            // Оновлюємо існуючий контакт
+                            existingContact.Name = updatedContact.Name;
+                            existingContact.Photo = updatedContact.Photo;
+                            existingContact.IsPhotoDefault = updatedContact.IsPhotoDefault;
+                            existingContact.IsDeleted = updatedContact.IsDeleted;
+                            existingContact.DeletionDate = updatedContact.DeletionDate;
+                            CheckPhotoExistence(existingContact, false);
+                        }
+                        else
+                        {
+                            // Додаємо новий контакт
+                            updatedContact.Initialize();
+                            CheckPhotoExistence(updatedContact, false);
+                            updatedContact.PropertyChanged += Contact_PropertyChanged;
+                            Contacts.Add(updatedContact);
+                        }
+                    }
+
+                    // Після перевірки всіх контактів оновлюємо ContactService
+                    foreach (var contact in Contacts)
+                    {
+                        if (contact.IsPhotoDefault != updatedContacts.First(c => c.Id == contact.Id).IsPhotoDefault ||
+                            contact.Photo != updatedContacts.First(c => c.Id == contact.Id).Photo)
+                        {
+                            _contactService.UpdateContact(contact);
+                        }
+                    }
+
+                    _trashContactsViewSource.View.Refresh();
+                    UpdateFilteredTrashContactsCount();
+
+                    // Оновлення DataContext для коректного відображення змін
+                    DataContext = null;
+                    DataContext = this;
+                }
+                finally
+                {
+                    _isUpdating = false;
+                }
+            });
         }
 
         private void TrashContactsViewSource_Filter(object sender, FilterEventArgs e)
@@ -162,6 +262,11 @@ namespace ContactManagerApp.Views
                 _trashContactsViewSource.View.Refresh();
                 UpdateFilteredTrashContactsCount();
             }
+            else if (e.PropertyName == nameof(Contact.Photo))
+            {
+                CheckPhotoExistence(contact, true); // Оновлюємо ContactService при зміні Photo
+                _trashContactsViewSource.View.Refresh();
+            }
         }
 
         private void SelectedContacts_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -185,6 +290,32 @@ namespace ContactManagerApp.Views
                 _contactService.UpdateContact(contact);
                 _trashContactsViewSource.View.Refresh();
                 UpdateFilteredTrashContactsCount();
+
+                // Примусово оновлюємо список і DataContext
+                var updatedContacts = _contactService.GetAllContacts().ToList();
+                Contacts.Clear();
+                foreach (var updatedContact in updatedContacts)
+                {
+                    var existingContact = Contacts.FirstOrDefault(c => c.Id == updatedContact.Id);
+                    if (existingContact != null)
+                    {
+                        existingContact.Name = updatedContact.Name;
+                        existingContact.Photo = updatedContact.Photo;
+                        existingContact.IsPhotoDefault = updatedContact.IsPhotoDefault;
+                        existingContact.IsDeleted = updatedContact.IsDeleted;
+                        existingContact.DeletionDate = updatedContact.DeletionDate;
+                        CheckPhotoExistence(existingContact, false);
+                    }
+                    else
+                    {
+                        updatedContact.Initialize();
+                        CheckPhotoExistence(updatedContact, false);
+                        updatedContact.PropertyChanged += Contact_PropertyChanged;
+                        Contacts.Add(updatedContact);
+                    }
+                }
+                DataContext = null;
+                DataContext = this;
             }
         }
 
@@ -199,6 +330,32 @@ namespace ContactManagerApp.Views
             SelectedContacts.Clear();
             _trashContactsViewSource.View.Refresh();
             UpdateFilteredTrashContactsCount();
+
+            // Примусово оновлюємо список і DataContext
+            var updatedContacts = _contactService.GetAllContacts().ToList();
+            Contacts.Clear();
+            foreach (var updatedContact in updatedContacts)
+            {
+                var existingContact = Contacts.FirstOrDefault(c => c.Id == updatedContact.Id);
+                if (existingContact != null)
+                {
+                    existingContact.Name = updatedContact.Name;
+                    existingContact.Photo = updatedContact.Photo;
+                    existingContact.IsPhotoDefault = updatedContact.IsPhotoDefault;
+                    existingContact.IsDeleted = updatedContact.IsDeleted;
+                    existingContact.DeletionDate = updatedContact.DeletionDate;
+                    CheckPhotoExistence(existingContact, false);
+                }
+                else
+                {
+                    updatedContact.Initialize();
+                    CheckPhotoExistence(updatedContact, false);
+                    updatedContact.PropertyChanged += Contact_PropertyChanged;
+                    Contacts.Add(updatedContact);
+                }
+            }
+            DataContext = null;
+            DataContext = this;
         }
 
         private void PermanentlyDeleteSelectedContacts(object parameter)
@@ -236,6 +393,32 @@ namespace ContactManagerApp.Views
                         SelectedContacts.Clear();
                         _trashContactsViewSource.View.Refresh();
                         UpdateFilteredTrashContactsCount();
+
+                        // Примусово оновлюємо список і DataContext
+                        var updatedContacts = _contactService.GetAllContacts().ToList();
+                        Contacts.Clear();
+                        foreach (var updatedContact in updatedContacts)
+                        {
+                            var existingContact = Contacts.FirstOrDefault(c => c.Id == updatedContact.Id);
+                            if (existingContact != null)
+                            {
+                                existingContact.Name = updatedContact.Name;
+                                existingContact.Photo = updatedContact.Photo;
+                                existingContact.IsPhotoDefault = updatedContact.IsPhotoDefault;
+                                existingContact.IsDeleted = updatedContact.IsDeleted;
+                                existingContact.DeletionDate = updatedContact.DeletionDate;
+                                CheckPhotoExistence(existingContact, false);
+                            }
+                            else
+                            {
+                                updatedContact.Initialize();
+                                CheckPhotoExistence(updatedContact, false);
+                                updatedContact.PropertyChanged += Contact_PropertyChanged;
+                                Contacts.Add(updatedContact);
+                            }
+                        }
+                        DataContext = null;
+                        DataContext = this;
                     }
                 };
 
@@ -346,6 +529,26 @@ namespace ContactManagerApp.Views
             FilteredTrashContactsCount = _trashContactsViewSource.View.Cast<object>().Count();
         }
 
+        private void CheckPhotoExistence(Contact contact, bool updateService = true)
+        {
+            if (!string.IsNullOrEmpty(contact.Photo) && !contact.IsPhotoDefault)
+            {
+                string fullPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Data", contact.Photo);
+                if (!File.Exists(fullPath))
+                {
+                    contact.Photo = null;
+                    contact.IsPhotoDefault = true;
+                    contact.OnPropertyChanged(nameof(contact.Photo));
+                    contact.OnPropertyChanged(nameof(contact.Initials));
+                    contact.OnPropertyChanged(nameof(contact.IsPhotoDefault));
+                    if (updateService)
+                    {
+                        _contactService.UpdateContact(contact);
+                    }
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string propertyName)
         {
@@ -355,7 +558,8 @@ namespace ContactManagerApp.Views
         ~TrashContactListView()
         {
             LocalizationManager.LanguageChanged -= OnLanguageChanged;
-            _contactService.ContactsChanged -= (s, e) => { };
+            _contactService.ContactsChanged -= OnContactsChanged;
+            _navigationService.GetFrame().Navigated -= OnNavigated;
         }
     }
 }

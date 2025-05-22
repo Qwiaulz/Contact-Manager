@@ -43,6 +43,9 @@ namespace ContactManagerApp.Views
                 this.DataContext = null;
                 this.DataContext = this;
             };
+
+            // Перевірка стану фото при ініціалізації
+            CheckPhotoExistence();
         }
 
         private void ChoosePhoto(object parameter)
@@ -72,6 +75,7 @@ namespace ContactManagerApp.Views
 
                     File.Copy(openFileDialog.FileName, destinationPath, true);
                     _contact.Photo = Path.Combine("Photos", newFileName).Replace("\\", "/");
+                    _contact.IsPhotoDefault = false;
                     _contact.UpdatedDate = DateTime.Now;
 
                     // Оновлюємо контакт у сервісі
@@ -135,10 +139,10 @@ namespace ContactManagerApp.Views
                 // М'яке видалення: переносимо до кошика
                 var dialog = new CustomConfirmationDialog
                 {
-                    Title = LocalizationManager.GetString("ConfirmDeleteTitle"),
-                    Message = LocalizationManager.GetString("ConfirmDeleteMessage"),
-                    ConfirmButtonText = LocalizationManager.GetString("Yes"),
-                    CancelButtonText = LocalizationManager.GetString("No")
+                    Title = LocalizationManager.GetString("DeleteContactTitle"),
+                    Message = LocalizationManager.GetString("DeleteContactMessage"),
+                    ConfirmButtonText = LocalizationManager.GetString("MoveToBasket"),
+                    CancelButtonText = LocalizationManager.GetString("Cancel")
                 };
 
                 var window = new Window
@@ -168,7 +172,7 @@ namespace ContactManagerApp.Views
                 // Остаточне видалення
                 var dialog = new CustomConfirmationDialog
                 {
-                    Title = LocalizationManager.GetString("ConfirmDeleteTitle"),
+                    Title = LocalizationManager.GetString("DeleteContactTitle"),
                     Message = LocalizationManager.GetString("ConfirmPermanentDeleteMessage"),
                     ConfirmButtonText = LocalizationManager.GetString("Yes"),
                     CancelButtonText = LocalizationManager.GetString("No")
@@ -203,6 +207,24 @@ namespace ContactManagerApp.Views
             _contact.IsFavourite = !_contact.IsFavourite;
             _contactService.UpdateContact(_contact);
             _contactService.NotifyContactsChanged();
+        }
+
+        private void CheckPhotoExistence()
+        {
+            if (!string.IsNullOrEmpty(_contact.Photo) && !_contact.IsPhotoDefault)
+            {
+                string fullPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Data", _contact.Photo);
+                if (!File.Exists(fullPath))
+                {
+                    _contact.Photo = null;
+                    _contact.IsPhotoDefault = true;
+                    _contact.OnPropertyChanged(nameof(_contact.Photo));
+                    _contact.OnPropertyChanged(nameof(_contact.Initials));
+                    _contact.OnPropertyChanged(nameof(_contact.IsPhotoDefault));
+                    _contactService.UpdateContact(_contact);
+                    _contactService.NotifyContactsChanged();
+                }
+            }
         }
     }
 }

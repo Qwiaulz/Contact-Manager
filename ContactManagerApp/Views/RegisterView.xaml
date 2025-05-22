@@ -162,6 +162,7 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Height" Value="20"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
@@ -222,92 +223,113 @@
 
     <!-- Фіксована біла плитка -->
     <Border Background="#ffffff" CornerRadius="20" Padding="30" Margin="20"
-            Width="335" Height="390" MaxWidth="335" MaxHeight="490" 
-            HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Border.Effect>
-            <DropShadowEffect Color="#333333" 
-                              ShadowDepth="0" 
-                              Opacity="0.25" 
-                              BlurRadius="15"/>
-        </Border.Effect>
-        <StackPanel>
-            <TextBlock Text="Registration"
-                       FontSize="24" FontWeight="SemiBold"
-                       Foreground="#444746"
-                       HorizontalAlignment="Center"
-                       Margin="0,0,0,25"/>
+        Width="335" Height="455" MaxWidth="335" MaxHeight="550" 
+        HorizontalAlignment="Center" VerticalAlignment="Center">
+    <Border.Effect>
+        <DropShadowEffect Color="#333333" 
+                          ShadowDepth="0" 
+                          Opacity="0.25" 
+                          BlurRadius="15"/>
+    </Border.Effect>
+    <StackPanel>
+        <TextBlock Text="Registration"
+                   FontSize="24" FontWeight="SemiBold"
+                   Foreground="#444746"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,25"/>
 
-            <Grid Margin="0,0,0,15" HorizontalAlignment="Center">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="20"/>
-                </Grid.RowDefinitions>
-                <Grid Grid.Row="0">
-                    <TextBox x:Name="UsernameTextBox" Grid.Row="0" Style="{DynamicResource TextInputStyle}"/>
-                    <TextBlock IsHitTestVisible="False" 
-                               Text="Username" 
-                               Foreground="#444746" 
-                               FontSize="14" 
-                               VerticalAlignment="Center" 
-                               Margin="12,0,0,0"
-                               Visibility="{Binding ElementName=UsernameTextBox, Path=Text, Converter={StaticResource StringToVisibilityConverter}, FallbackValue=Visible}"/>
-                </Grid>
-                <TextBlock x:Name="UsernameError" Grid.Row="1" Style="{DynamicResource ErrorTextStyle}"/>
+        <!-- Поле Username -->
+        <Grid Margin="0,0,0,15" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="20"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <TextBox x:Name="UsernameTextBox" Grid.Row="0" Style="{DynamicResource TextInputStyle}"/>
+                <TextBlock IsHitTestVisible="False" 
+                           Text="Username" 
+                           Foreground="#444746" 
+                           FontSize="14" 
+                           VerticalAlignment="Center" 
+                           Margin="12,0,0,0"
+                           Visibility="{Binding ElementName=UsernameTextBox, Path=Text, Converter={StaticResource StringToVisibilityConverter}, FallbackValue=Visible}"/>
             </Grid>
+            <TextBlock x:Name="UsernameError" Grid.Row="1" Style="{DynamicResource ErrorTextStyle}"/>
+        </Grid>
 
-            <Grid Margin="0,-10,0,25" HorizontalAlignment="Center">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="40"/>
-                    <RowDefinition Height="20"/>
-                </Grid.RowDefinitions>
-                <Grid Grid.Row="0">
-                    <PasswordBox x:Name="PasswordBox" Grid.Row="0" Style="{DynamicResource PasswordInputStyle}" PasswordChanged="PasswordBox_PasswordChanged"/>
-                    <TextBlock IsHitTestVisible="False" 
-                               Text="Password" 
-                               Foreground="#444746" 
-                               FontSize="14" 
-                               VerticalAlignment="Center" 
-                               Margin="12,0,0,0"
-                               Visibility="{Binding PasswordText, Converter={StaticResource StringToVisibilityConverter}, FallbackValue=Visible}"/>
-                </Grid>
-                <TextBlock x:Name="PasswordError" Grid.Row="1" Style="{DynamicResource ErrorTextStyle}"/>
+        <!-- Поле Name (необов’язкове) -->
+        <Grid Margin="0,0,0,15" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="20"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <TextBox x:Name="NameTextBox" Grid.Row="0" Style="{DynamicResource TextInputStyle}"/>
+                <TextBlock IsHitTestVisible="False" 
+                           Text="Name (optional)" 
+                           Foreground="#444746" 
+                           FontSize="14" 
+                           VerticalAlignment="Center" 
+                           Margin="12,0,0,0"
+                           Visibility="{Binding ElementName=NameTextBox, Path=Text, Converter={StaticResource StringToVisibilityConverter}, FallbackValue=Visible}"/>
             </Grid>
+            <TextBlock x:Name="NameError" Grid.Row="1" Style="{DynamicResource ErrorTextStyle}"/>
+        </Grid>
 
-            <Grid Margin="-155,-20,0,25" HorizontalAlignment="Center">
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <CheckBox x:Name="RememberMeCheckBox" 
-                              Style="{DynamicResource CustomCheckBoxStyle}"
-                              VerticalAlignment="Center"
-                              Height="20"/>
-                    <TextBlock Text="Remember Me"
-                               FontSize="14"
-                               Foreground="#444746"
-                               FontWeight="Regular"
-                               VerticalAlignment="Center"
-                               Margin="5,0,0,0"/>
-                </StackPanel>
+        <!-- Поле Password -->
+        <Grid Margin="0,0,0,25" HorizontalAlignment="Center">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="20"/>
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0">
+                <PasswordBox x:Name="PasswordBox" Grid.Row="0" Style="{DynamicResource PasswordInputStyle}" PasswordChanged="PasswordBox_PasswordChanged"/>
+                <TextBlock IsHitTestVisible="False" 
+                           Text="Password" 
+                           Foreground="#444746" 
+                           FontSize="14" 
+                           VerticalAlignment="Center" 
+                           Margin="12,0,0,0"
+                           Visibility="{Binding PasswordText, Converter={StaticResource StringToVisibilityConverter}, FallbackValue=Visible}"/>
             </Grid>
+            <TextBlock x:Name="PasswordError" Grid.Row="1" Style="{DynamicResource ErrorTextStyle}"/>
+        </Grid>
 
-            <Button Content="Register"
-                    Width="270" Height="40"
-                    Style="{DynamicResource PrimaryButtonStyle}"
-                    HorizontalAlignment="Center"
-                    Margin="0,0,0,15"
-                    Click="RegisterButton_Click"/>
-
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <TextBlock Text="Already have an account?"
-                           FontSize="14" Foreground="#444746"
+        <Grid Margin="-155,-20,0,25" HorizontalAlignment="Center">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <CheckBox x:Name="RememberMeCheckBox" 
+                          Style="{DynamicResource CustomCheckBoxStyle}"
+                          VerticalAlignment="Center"
+                          Height="20"/>
+                <TextBlock Text="Remember Me"
+                           FontSize="14"
+                           Foreground="#444746"
+                           FontWeight="Regular"
                            VerticalAlignment="Center"
-                           FontWeight="Normal"
-                           Margin="0,0,5,0"/>
-                <TextBlock Text="Sign In"
-                           FontSize="14" Foreground="#444746"
-                           FontWeight="Bold"
-                           VerticalAlignment="Center"
-                           Cursor="Hand"
-                           MouseDown="LoginLink_Click"/>
+                           Margin="5,0,0,0"/>
             </StackPanel>
+        </Grid>
+
+        <Button Content="Register"
+                Width="270" Height="40"
+                Style="{DynamicResource PrimaryButtonStyle}"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,15"
+                Click="RegisterButton_Click"/>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Text="Already have an account?"
+                       FontSize="14" Foreground="#444746"
+                       VerticalAlignment="Center"
+                       FontWeight="Normal"
+                       Margin="0,0,5,0"/>
+            <TextBlock Text="Sign In"
+                       FontSize="14" Foreground="#444746"
+                       FontWeight="Bold"
+                       VerticalAlignment="Center"
+                       Cursor="Hand"
+                       MouseDown="LoginLink_Click"/>
         </StackPanel>
-    </Border>
+    </StackPanel>
+</Border>
 </UserControl>

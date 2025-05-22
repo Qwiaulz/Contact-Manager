@@ -1,3 +1,4 @@
+using ContactManagerApp.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,7 +6,6 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using ContactManagerApp.Models;
 
 namespace ContactManagerApp.Services
 {
@@ -43,7 +43,7 @@ namespace ContactManagerApp.Services
             }
         }
 
-        public static bool Register(string username, string password, out User newUser)
+        public static bool Register(string username, string password, string name, out User newUser)
         {
             newUser = null;
             var users = LoadUsers();
@@ -65,7 +65,8 @@ namespace ContactManagerApp.Services
                 Role = "user",
                 IsActive = true,
                 Language = "uk",
-                Theme = "Light"
+                Theme = "Light",
+                Name = name
             };
             users.Add(newUser);
 
@@ -81,7 +82,7 @@ namespace ContactManagerApp.Services
             }
 
             SaveUsers(users);
-            System.Diagnostics.Debug.WriteLine($"Registered user: {username}, UserId: {newUser.UserId}, ContactFolderCode: {newUser.ContactFolderCode}");
+            System.Diagnostics.Debug.WriteLine($"Registered user: {username}, UserId: {newUser.UserId}, ContactFolderCode: {newUser.ContactFolderCode}, Name: {newUser.Name}");
             return true;
         }
 
@@ -130,6 +131,21 @@ namespace ContactManagerApp.Services
             bool exists = users.Any(u => u.Username == username);
             System.Diagnostics.Debug.WriteLine($"Checked if user {username} exists: {exists}");
             return exists;
+        }
+
+        public static User? FindUserByPhoneNumber(string phoneNumber)
+        {
+            var users = LoadUsers();
+            var user = users.FirstOrDefault(u => u.PhoneNumber == phoneNumber && u.IsActive);
+            if (user == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"No user found with phone number: {phoneNumber}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"Found user with phone number: {phoneNumber}, UserId: {user.UserId}");
+            }
+            return user;
         }
 
         public static bool ChangePassword(string userId, string oldPassword, string newPassword)
@@ -236,6 +252,26 @@ namespace ContactManagerApp.Services
             {
                 System.Diagnostics.Debug.WriteLine($"Failed to save user settings: {ex.Message}");
             }
+        }
+        
+        public static bool UpdateUserProfile(string userId, string name, string phoneNumber, string email, string photoPath)
+        {
+            var users = LoadUsers();
+            var user = users.FirstOrDefault(u => u.UserId == userId && u.IsActive);
+            if (user == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Update profile failed: UserId {userId} not found or inactive");
+                return false;
+            }
+
+            user.Name = name;
+            user.PhoneNumber = phoneNumber;
+            user.Email = email;
+            user.PhotoPath = photoPath;
+
+            SaveUsers(users);
+            System.Diagnostics.Debug.WriteLine($"Profile updated for UserId: {userId}, Name: {name}, Phone: {phoneNumber}, Email: {email}, PhotoPath: {photoPath}");
+            return true;
         }
 
         public static List<User> LoadUsers()

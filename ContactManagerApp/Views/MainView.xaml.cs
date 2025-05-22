@@ -7,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Navigation;
+using NavigationService = ContactManagerApp.Services.NavigationService;
 
 namespace ContactManagerApp.Views
 {
@@ -49,6 +51,9 @@ namespace ContactManagerApp.Views
             
             _navigationService = new NavigationService(MainFrame);
 
+            // Додаємо обробник для події Navigating
+            _navigationService.GetFrame().Navigating += MainFrame_Navigating;
+
             _navigationService.Navigate(new ContactListView(_navigationService, _contactService));
 
             ContactsButton.Focus();
@@ -56,6 +61,69 @@ namespace ContactManagerApp.Views
             UpdateSidebarState();
 
             LocalizationManager.LanguageChanged += OnLanguageChanged;
+        }
+
+        private void MainFrame_Navigating(object sender, NavigatingCancelEventArgs e)
+        {
+            // Перевіряємо, чи поточна сторінка – SettingsView
+            if (MainFrame.Content is SettingsView settingsView)
+            {
+                // Перевіряємо, чи є незбережені зміни
+                if (settingsView.HasUnsavedChanges)
+                {
+                    // Перевіряємо валідність даних
+                    if (!settingsView.ValidateData())
+                    {
+                        // Якщо дані невалідні, скидаємо зміни і дозволяємо навігацію
+                        settingsView.DiscardChanges();
+                        return; // Навігація продовжиться, але зміни не збережуться
+                    }
+
+                    // Якщо дані валідні, показуємо діалог підтвердження
+                    var dialog = new CustomConfirmationDialog
+                    {
+                        Title = LocalizationManager.GetString("UnsavedChangesTitle"),
+                        Message = LocalizationManager.GetString("UnsavedChangesMessage"),
+                        ConfirmButtonText = LocalizationManager.GetString("Save"),
+                        CancelButtonText = LocalizationManager.GetString("Cancel")
+                    };
+
+                    var window = new Window
+                    {
+                        AllowsTransparency = true,
+                        Content = dialog,
+                        SizeToContent = SizeToContent.WidthAndHeight,
+                        WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                        WindowStyle = WindowStyle.None,
+                        ResizeMode = ResizeMode.NoResize,
+                        Background = null
+                    };
+
+                    bool? dialogResult = null;
+                    dialog.DialogResult += (s, result) =>
+                    {
+                        dialogResult = result;
+                        if (result)
+                        {
+                            // Зберігаємо зміни без показу діалогу успіху
+                            settingsView.SaveProfileChanges(showSuccessDialog: false);
+                        }
+                        else
+                        {
+                            // Скасовуємо зміни
+                            settingsView.DiscardChanges();
+                        }
+                    };
+
+                    window.ShowDialog();
+
+                    // Якщо користувач натиснув "Cancel", скасовуємо навігацію
+                    if (dialogResult == false)
+                    {
+                        e.Cancel = true;
+                    }
+                }
+            }
         }
 
         private void OnLanguageChanged(object sender, EventArgs e)
@@ -218,6 +286,7 @@ namespace ContactManagerApp.Views
         ~MainView()
         {
             LocalizationManager.LanguageChanged -= OnLanguageChanged;
+            _navigationService.GetFrame().Navigating -= MainFrame_Navigating;
         }
     }
 }

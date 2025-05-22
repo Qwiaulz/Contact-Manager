@@ -36,6 +36,7 @@
             <Setter Property="Padding" Value="20,2,20,0"/>
             <Setter Property="Margin" Value="0,10,20,0"/>
             <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -64,6 +65,7 @@
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Width" Value="36"/>
             <Setter Property="Height" Value="36"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -94,6 +96,7 @@
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Width" Value="24"/>
             <Setter Property="Height" Value="24"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -155,7 +158,7 @@
             <Setter Property="FontFamily" Value="Segoe MDL2"/>
             <Setter Property="FontSize" Value="20"/>
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
-            <Setter Property="Margin" Value="0,0,8,0"/>
+            <Setter Property="Margin" Value="0,5,8,0"/>
             <Setter Property="VerticalAlignment" Value="Top"/>
         </Style>
 
@@ -227,7 +230,7 @@
         <!-- Аватарка -->
         <Grid Grid.Row="1" HorizontalAlignment="Left" Margin="25,10,0,24">
             <!-- Базовий круг (фон для ініціалів або фото) -->
-            <Ellipse Width="158" Height="158">
+            <Ellipse Width="158" Height="158" MouseLeftButtonDown="AddPhotoCircle_MouseLeftButtonDown" Cursor="Hand">
                 <Ellipse.Fill>
                     <SolidColorBrush Color="{Binding SelectedContact.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
                 </Ellipse.Fill>
@@ -239,7 +242,7 @@
                 </Ellipse.Effect>
             </Ellipse>
             <!-- Фото (якщо є) -->
-            <Ellipse Width="160" Height="160">
+            <Ellipse Width="160" Height="160" MouseLeftButtonDown="AddPhotoCircle_MouseLeftButtonDown" Cursor="Hand">
                 <Ellipse.Fill>
                     <ImageBrush ImageSource="{Binding SelectedContact.Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
                 </Ellipse.Fill>
@@ -249,28 +252,18 @@
             </Ellipse>
             <!-- Ініціали (показуються, якщо фото немає або це дефолтне фото) -->
             <TextBlock Text="{Binding SelectedContact.Initials}" 
-                       FontSize="40" 
+                       FontSize="40"
                        FontWeight="SemiBold" 
                        Foreground="#FFFFFF" 
                        HorizontalAlignment="Center" 
                        VerticalAlignment="Center"
+                       MouseLeftButtonDown="AddPhotoCircle_MouseLeftButtonDown"
+                       Cursor="Hand"
                        Visibility="{Binding SelectedContact.Photo, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Visible,Collapsed,Collapsed', FallbackValue=Visible}"/>
-            <!-- Іконка для додавання фото -->
-            <Border x:Name="AddPhotoCircle" 
-                    Style="{StaticResource PhotoActionIconStyle}" 
-                    MouseLeftButtonDown="AddPhotoCircle_MouseLeftButtonDown"
-                    Visibility="{Binding SelectedContact, Converter={StaticResource PhotoVisibilityConverter}}">
-                <TextBlock HorizontalAlignment="Center" 
-                           VerticalAlignment="Center" 
-                           Foreground="White" 
-                           Text="+" 
-                           FontSize="28" 
-                           Margin="0,-6,0,0"/>
-            </Border>
         </Grid>
 
         <!-- Деталі -->
-        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Margin="25,10,0,0">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden" Margin="25,10,0,0">
             <StackPanel>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -310,7 +303,7 @@
                                             <TextBlock Grid.Column="0" Text="📱" Style="{StaticResource IconStyle}"/>
                                             <StackPanel Grid.Column="1" Orientation="Horizontal">
                                                 <TextBlock Text="{Binding Number}" Style="{StaticResource DetailTextStyle}"/>
-                                                <TextBlock Text=" - " Margin="4,0" Style="{StaticResource DetailTextStyle}"/>
+                                                <TextBlock Text="•" Margin="6,0" Style="{StaticResource DetailTextStyle}"/>
                                                 <TextBlock Text="{Binding Type}" Style="{StaticResource DetailTextStyle}"/>
                                             </StackPanel>
                                         </Grid>
@@ -331,7 +324,7 @@
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
                                 <TextBlock Grid.Column="0" Text="👥" Style="{StaticResource IconStyle}"/>
-                                <TextBlock Grid.Column="1" Text="{Binding SelectedContact.Relationship}" Style="{StaticResource DetailTextStyle}"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SelectedContact.Relationship}" Style="{StaticResource DetailTextStyle}" Margin="0,6,0,4"/>
                             </Grid>
                             <Grid Visibility="{Binding SelectedContact.Notes, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Collapsed,Visible,Visible'}">
                                 <Grid.ColumnDefinitions>

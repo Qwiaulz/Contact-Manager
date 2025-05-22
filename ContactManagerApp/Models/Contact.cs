@@ -241,9 +241,10 @@
             {
                 bool isEmpty = string.IsNullOrEmpty(Name);
                 bool isOnlyDigits = !isEmpty && Name.All(c => char.IsDigit(c) || char.IsWhiteSpace(c));
+                bool isOnlySpecialChars = !isEmpty && Name.All(c => char.IsWhiteSpace(c) || !char.IsLetterOrDigit(c));
                 string defaultPhotoPathRelative = Path.Combine("Assets", "Photo", "default_photo.png").Replace("\\", "/");
 
-                if ((isEmpty || isOnlyDigits) && string.IsNullOrEmpty(Photo))
+                if ((isEmpty || isOnlyDigits || isOnlySpecialChars) && string.IsNullOrEmpty(Photo))
                 {
                     string projectRoot = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
                     string defaultPhotoPath = Path.Combine(projectRoot, "Assets", "Photo", "default_photo.png");
@@ -257,7 +258,7 @@
                         Photo = null;
                     }
                 }
-                else if (!(isEmpty || isOnlyDigits) && IsPhotoDefault)
+                else if (!(isEmpty || isOnlyDigits || isOnlySpecialChars) && IsPhotoDefault)
                 {
                     Photo = null;
                 }

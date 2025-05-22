@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows;
@@ -148,6 +149,7 @@ namespace ContactManagerApp.Views
                 foreach (var contact in group)
                 {
                     contact.Initialize();
+                    CheckPhotoExistence(contact); // Перевірка фото для кожного контакту
                 }
 
                 var duplicateGroup = new DuplicateGroup { Contacts = group, IsMerged = false };
@@ -285,6 +287,23 @@ namespace ContactManagerApp.Views
             if (contact != null)
             {
                 _navigationService.Navigate(new ContactDetailsView(contact, _navigationService, _contactService));
+            }
+        }
+
+        private void CheckPhotoExistence(Contact contact)
+        {
+            if (!string.IsNullOrEmpty(contact.Photo) && !contact.IsPhotoDefault)
+            {
+                string fullPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Data", contact.Photo);
+                if (!File.Exists(fullPath))
+                {
+                    contact.Photo = null;
+                    contact.IsPhotoDefault = true;
+                    contact.OnPropertyChanged(nameof(contact.Photo));
+                    contact.OnPropertyChanged(nameof(contact.Initials));
+                    contact.OnPropertyChanged(nameof(contact.IsPhotoDefault));
+                    _contactService.UpdateContact(contact);
+                }
             }
         }
 

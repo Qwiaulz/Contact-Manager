@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.IO;
 
 namespace ContactManagerApp.Views
 {
@@ -52,6 +53,9 @@ namespace ContactManagerApp.Views
             foreach (var contact in Contacts)
             {
                 contact.Initialize();
+                CheckPhotoExistence(contact); // Перевірка фото при ініціалізації
+                contact.PropertyChanged += Contact_PropertyChanged;
+                SubscribeToPhoneAndEmailChanges(contact);
             }
             SelectedContacts = new ObservableCollection<Contact>();
 
@@ -78,12 +82,6 @@ namespace ContactManagerApp.Views
 
             LocalizationManager.LanguageChanged += OnLanguageChanged;
             SelectedContacts.CollectionChanged += SelectedContacts_CollectionChanged;
-
-            foreach (var contact in Contacts)
-            {
-                contact.PropertyChanged += Contact_PropertyChanged;
-                SubscribeToPhoneAndEmailChanges(contact);
-            }
 
             ClearSelection(null);
 
@@ -116,6 +114,7 @@ namespace ContactManagerApp.Views
                 foreach (var contact in _contactService.GetAllContacts())
                 {
                     contact.Initialize();
+                    CheckPhotoExistence(contact); // Перевірка при оновленні списку
                     contact.PropertyChanged -= Contact_PropertyChanged;
                     contact.PropertyChanged += Contact_PropertyChanged;
                     SubscribeToPhoneAndEmailChanges(contact);
@@ -196,6 +195,10 @@ namespace ContactManagerApp.Views
             {
                 _contactsViewSource.View.Refresh();
                 UpdateFilteredContactsCount();
+            }
+            else if (e.PropertyName == nameof(Contact.Photo))
+            {
+                CheckPhotoExistence(contact);
             }
         }
 
@@ -416,6 +419,23 @@ namespace ContactManagerApp.Views
         private void UpdateFilteredContactsCount()
         {
             FilteredContactsCount = _contactsViewSource.View.Cast<object>().Count();
+        }
+
+        private void CheckPhotoExistence(Contact contact)
+        {
+            if (!string.IsNullOrEmpty(contact.Photo) && !contact.IsPhotoDefault)
+            {
+                string fullPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Data", contact.Photo);
+                if (!File.Exists(fullPath))
+                {
+                    contact.Photo = null;
+                    contact.IsPhotoDefault = true;
+                    contact.OnPropertyChanged(nameof(contact.Photo));
+                    contact.OnPropertyChanged(nameof(contact.Initials));
+                    contact.OnPropertyChanged(nameof(contact.IsPhotoDefault));
+                    _contactService.UpdateContact(contact);
+                }
+            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

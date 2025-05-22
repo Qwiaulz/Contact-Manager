@@ -58,7 +58,8 @@ namespace ContactManagerApp.Views
                 IsDeleted = contact.IsDeleted,
                 Notes = contact.Notes,
                 CreatedDate = contact.CreatedDate,
-                UpdatedDate = contact.UpdatedDate
+                UpdatedDate = contact.UpdatedDate,
+                IsPhotoDefault = contact.IsPhotoDefault // Додаємо копіювання IsPhotoDefault
             };
 
             EditedContact.Initialize();
@@ -78,6 +79,9 @@ namespace ContactManagerApp.Views
                 PhotoActionIcon.ContextMenu.DataContext = this;
             }
             LocalizationManager.LanguageChanged += OnLanguageChanged;
+
+            // Перевірка стану фото при ініціалізації
+            CheckPhotoExistence();
         }
 
         private void InitializeComboBoxLists()
@@ -129,8 +133,10 @@ namespace ContactManagerApp.Views
 
                     File.Copy(openFileDialog.FileName, destinationPath, true);
                     EditedContact.Photo = Path.Combine("Photos", newFileName).Replace("\\", "/");
+                    EditedContact.IsPhotoDefault = false;
                     EditedContact.OnPropertyChanged(nameof(EditedContact.Photo));
                     EditedContact.OnPropertyChanged(nameof(EditedContact.Initials));
+                    EditedContact.OnPropertyChanged(nameof(EditedContact.IsPhotoDefault));
 
                     if (PhotoActionIcon.ContextMenu != null)
                     {
@@ -166,6 +172,7 @@ namespace ContactManagerApp.Views
 
         private void PhotoActionIcon_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            CheckPhotoExistence();
             if (!string.IsNullOrEmpty(EditedContact.Photo) && !EditedContact.IsPhotoDefault)
             {
                 if (PhotoActionIcon != null && PhotoActionIcon.ContextMenu != null)
@@ -219,8 +226,10 @@ namespace ContactManagerApp.Views
                     }
                 }
                 EditedContact.Photo = null;
+                EditedContact.IsPhotoDefault = true;
                 EditedContact.OnPropertyChanged(nameof(EditedContact.Photo));
                 EditedContact.OnPropertyChanged(nameof(EditedContact.Initials));
+                EditedContact.OnPropertyChanged(nameof(EditedContact.IsPhotoDefault));
                 EditedContact.Initialize();
             }
 
@@ -254,6 +263,7 @@ namespace ContactManagerApp.Views
             _originalContact.IsFavourite = EditedContact.IsFavourite;
             _originalContact.Address = EditedContact.Address;
             _originalContact.Photo = EditedContact.Photo;
+            _originalContact.IsPhotoDefault = EditedContact.IsPhotoDefault; // Оновлюємо IsPhotoDefault
             _originalContact.RelationshipKey = EditedContact.RelationshipKey;
             _originalContact.Notes = EditedContact.Notes;
             _originalContact.UpdatedDate = DateTime.Now;
@@ -328,6 +338,22 @@ namespace ContactManagerApp.Views
             EditedContact.OnPropertyChanged(nameof(Contact.Relationship));
         }
 
+        private void CheckPhotoExistence()
+        {
+            if (!string.IsNullOrEmpty(EditedContact.Photo) && !EditedContact.IsPhotoDefault)
+            {
+                string fullPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Data", EditedContact.Photo);
+                if (!File.Exists(fullPath))
+                {
+                    EditedContact.Photo = null;
+                    EditedContact.IsPhotoDefault = true;
+                    EditedContact.OnPropertyChanged(nameof(EditedContact.Photo));
+                    EditedContact.OnPropertyChanged(nameof(EditedContact.Initials));
+                    EditedContact.OnPropertyChanged(nameof(EditedContact.IsPhotoDefault));
+                }
+            }
+        }
+
         ~EditContactView()
         {
             LocalizationManager.LanguageChanged -= OnLanguageChanged;
@@ -380,16 +406,14 @@ namespace ContactManagerApp.Views
                         bitmap.EndInit();
                         return bitmap;
                     }
-                    else
-                    {
-                        return null;
-                    }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
+                    // Якщо фото не вдалося завантажити, повертаємо null, щоб XAML показав ініціали
                     return null;
                 }
             }
+            // Якщо фото немає, повертаємо null, щоб відобразилися ініціали
             return null;
         }
 

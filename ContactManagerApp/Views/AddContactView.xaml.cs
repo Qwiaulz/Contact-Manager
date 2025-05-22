@@ -7,6 +7,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace ContactManagerApp.Views
 {
@@ -24,7 +25,7 @@ namespace ContactManagerApp.Views
         public ICommand RemovePhotoCommand { get; }
         private readonly string _photosDirectory;
         public ICommand CancelContextMenuCommand { get; }
-
+        private bool _hasShownDialogForPhone;
         public AddContactView(NavigationService navigationService, ContactService contactService)
         {
             InitializeComponent();
@@ -65,6 +66,7 @@ namespace ContactManagerApp.Views
             }
 
             LocalizationManager.LanguageChanged += OnLanguageChanged;
+            _hasShownDialogForPhone = false; // Ініціалізуємо флаг
         }
 
         private void InitializeComboBoxLists()
@@ -299,6 +301,7 @@ namespace ContactManagerApp.Views
         private void AddPhoneNumber_Click(object sender, RoutedEventArgs e)
         {
             Phones.Add(new PhoneNumber { TypeKey = "PhoneTypeMobile", Number = "" });
+            _hasShownDialogForPhone = false; // Скидаємо флаг при додаванні нового номера
         }
 
         private void RemovePhoneNumber_Click(object sender, RoutedEventArgs e)
@@ -307,6 +310,7 @@ namespace ContactManagerApp.Views
             {
                 Phones.Remove(phone);
             }
+            _hasShownDialogForPhone = false; // Скидаємо флаг при видаленні номера
         }
 
         private void AddEmail_Click(object sender, RoutedEventArgs e)
@@ -320,6 +324,117 @@ namespace ContactManagerApp.Views
             {
                 Emails.Remove(email);
             }
+        }
+
+    private void PhoneTextBox_TextChanged(object sender, TextChangedEventArgs e)
+{
+    if (_hasShownDialogForPhone) return; // Якщо діалог уже показаний, не повторюємо
+
+    if (sender is TextBox textBox && textBox.DataContext is PhoneNumber phoneNumber)
+    {
+        string phone = phoneNumber.Number?.Trim();
+        if (!string.IsNullOrEmpty(phone))
+        {
+            var user = AuthService.FindUserByPhoneNumber(phone);
+            if (user != null && (!string.IsNullOrEmpty(user.Name) || !string.IsNullOrEmpty(user.Email) || !string.IsNullOrEmpty(user.PhotoPath)))
+            {
+                _hasShownDialogForPhone = true; // Встановлюємо флаг, щоб уникнути повторного показу
+
+                string message = LocalizationManager.GetString("PhoneNumberFoundMessage", phone);
+                if (!string.IsNullOrEmpty(user.Name)) message += $"\n{LocalizationManager.GetString("Name")}: {user.Name}";
+                if (!string.IsNullOrEmpty(user.Email)) message += $"\n{LocalizationManager.GetString("Email")}: {user.Email}";
+                // Змінюємо формулювання для більш природного вигляду
+                message += $"\n{(!string.IsNullOrEmpty(user.PhotoPath) ? LocalizationManager.GetString("HasProfilePhoto") : LocalizationManager.GetString("NoProfilePhoto"))}";
+
+                var dialog = new CustomConfirmationDialog
+                {
+                    Title = LocalizationManager.GetString("PhoneNumberFoundTitle"),
+                    Message = message,
+                    ConfirmButtonText = LocalizationManager.GetString("Yes"),
+                    CancelButtonText = LocalizationManager.GetString("No")
+                };
+
+                var window = new Window
+                {
+                    AllowsTransparency = true,
+                    Content = dialog,
+                    SizeToContent = SizeToContent.WidthAndHeight,
+                    WindowStartupLocation = WindowStartupLocation.CenterScreen,
+                    WindowStyle = WindowStyle.None,
+                    ResizeMode = ResizeMode.NoResize,
+                    Background = null
+                };
+
+                dialog.DialogResult += (s, result) =>
+                {
+                    if (result)
+                    {
+                        // Заповнюємо поля, якщо користувач підтвердив
+                        if (!string.IsNullOrEmpty(user.Name))
+                        {
+                            NewContact.Name = user.Name;
+                            NameTextBox.Text = user.Name;
+                        }
+                        if (!string.IsNullOrEmpty(user.Email))
+                        {
+                            if (Emails.Count == 0)
+                            {
+                                Emails.Add(new Email { TypeKey = "EmailTypePersonal", Address = user.Email });
+                            }
+                            else
+                            {
+                                Emails[0].Address = user.Email;
+                                var emailTextBox = FindVisualChild<TextBox>(this, "EmailTextBox");
+                                if (emailTextBox != null)
+                                {
+                                    emailTextBox.Text = user.Email;
+                                }
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(user.PhotoPath))
+                        {
+                            // Створюємо нову копію файлу, щоб уникнути видалення оригіналу
+                            string extension = Path.GetExtension(user.PhotoPath);
+                            string newFileName = $"contact_temp_{DateTime.Now.Ticks}{extension}";
+                            string sourcePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Data", user.PhotoPath);
+                            string destinationPath = Path.Combine(_photosDirectory, newFileName);
+
+                            if (File.Exists(sourcePath))
+                            {
+                                File.Copy(sourcePath, destinationPath, true);
+                                NewContact.Photo = Path.Combine("Photos", newFileName).Replace("\\", "/");
+                                NewContact.OnPropertyChanged(nameof(NewContact.Photo));
+                                NewContact.OnPropertyChanged(nameof(NewContact.Initials));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        _hasShownDialogForPhone = false; // Скидаємо флаг, якщо користувач відмовився
+                    }
+                };
+                window.ShowDialog();
+            }
+        }
+    }
+}
+
+        private T FindVisualChild<T>(DependencyObject parent, string name) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T typedChild && (child as FrameworkElement)?.Name == name)
+                {
+                    return typedChild;
+                }
+                var result = FindVisualChild<T>(child, name);
+                if (result != null)
+                {
+                    return result;
+                }
+            }
+            return null;
         }
 
         private void OnLanguageChanged(object sender, EventArgs e)

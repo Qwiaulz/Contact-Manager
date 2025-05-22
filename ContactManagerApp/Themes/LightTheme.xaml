@@ -6,7 +6,7 @@
     <SolidColorBrush x:Key="ControlBackground" Color="#f1f3f4"/>
     
     <!-- Текст -->
-    <SolidColorBrush x:Key="TextColor" Color="#444746"/>
+    <SolidColorBrush x:Key="TextColor" Color="#353535"/>
     
     <!-- Кольори кнопок -->
     <SolidColorBrush x:Key="ButtonBackground" Color="#0b57d0"/>
@@ -21,7 +21,7 @@
     <SolidColorBrush x:Key="SidebarBackground" Color="#F3F3F3"/>
     
     <!-- Межа -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#C4C7C5"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="#d9d9d9"/>
     
     <!-- Колір тіні -->
     <Color x:Key="ShadowColor">#5E5E5E</Color>

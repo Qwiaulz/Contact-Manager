@@ -20,6 +20,7 @@
             <Setter Property="Padding" Value="15,0"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
             <Setter Property="Height" Value="45"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -52,12 +53,13 @@
             <Setter Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="Medium"/>
-            <Setter Property="Margin" Value="15,20,0,15"/>
+            <Setter Property="Margin" Value="15,20,0,5"/>
             <Setter Property="Padding" Value="20,0"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
             <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
             <Setter Property="Height" Value="60"/>
             <Setter Property="Width" Value="265"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -243,7 +245,7 @@
                         <!-- New contact -->
                         <Button x:Name="AddContactButton" Style="{DynamicResource AddContactButtonTemplate}" Click="AddContactButton_Click">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="+" FontSize="30" Margin="-5,-8,10,0" Foreground="{DynamicResource TextColor}"/>
+                                <TextBlock Text="+" FontSize="30" Margin="-5,-7,10,0" Foreground="{DynamicResource TextColor}"/>
                                 <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                           Converter={StaticResource LocalizationConverter}, 
                                                           ConverterParameter=CreateContact}" 
@@ -259,7 +261,7 @@
                                     <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                               Converter={StaticResource LocalizationConverter}, 
                                                               ConverterParameter=Contacts}" 
-                                               FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                                               FontSize="14" Margin="0,2,0,0" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
                                 </StackPanel>
                             </Button>
                             <Button x:Name="FavouriteButton" Style="{DynamicResource SidebarButtonStyle}" Click="FavouriteButton_Click">
@@ -268,7 +270,7 @@
                                     <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                               Converter={StaticResource LocalizationConverter}, 
                                                               ConverterParameter=Selected}" 
-                                               FontSize="14" Margin="0,3,0,0" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                                               FontSize="14" Margin="0,4,0,0" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -286,7 +288,7 @@
                                     <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                               Converter={StaticResource LocalizationConverter}, 
                                                               ConverterParameter=FindDuplicate}" 
-                                               FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                                               FontSize="14" Margin="0,2,0,0" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
                                 </StackPanel>
                             </Button>
                             <Button x:Name="TrashButton" Style="{DynamicResource SidebarButtonStyle}" Click="TrashButton_Click">
@@ -295,7 +297,7 @@
                                     <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                               Converter={StaticResource LocalizationConverter}, 
                                                               ConverterParameter=Basket}" 
-                                               FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                                               FontSize="14" Margin="0,2,0,0" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>
@@ -312,7 +314,7 @@
                                     <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                               Converter={StaticResource LocalizationConverter}, 
                                                               ConverterParameter=Settings}" 
-                                               FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                                               FontSize="14" Margin="0,2,0,0" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
                                 </StackPanel>
                             </Button>
                             <Button x:Name="LogoutButton" Style="{DynamicResource SidebarButtonStyle}" Click="LogoutButton_Click">
@@ -321,7 +323,7 @@
                                     <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                               Converter={StaticResource LocalizationConverter}, 
                                                               ConverterParameter=Logout}" 
-                                               FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
+                                               FontSize="14" Margin="0,2,0,0" FontFamily="Segoe UI" Foreground="{DynamicResource TextColor}"/>
                                 </StackPanel>
                             </Button>
                         </StackPanel>

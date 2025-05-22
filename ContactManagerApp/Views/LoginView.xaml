@@ -162,6 +162,7 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Height" Value="20"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
@@ -222,7 +223,7 @@
 
     <!-- Фіксована біла плитка -->
     <Border Background="#ffffff" CornerRadius="20" Padding="30" Margin="20"
-            Width="335" Height="390" MaxWidth="335" MaxHeight="490" 
+            Width="335" Height="370" MaxWidth="335" MaxHeight="370" 
             HorizontalAlignment="Center" VerticalAlignment="Center">
         <Border.Effect>
             <DropShadowEffect Color="#333333" 

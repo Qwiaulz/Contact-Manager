@@ -3,15 +3,91 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:services="clr-namespace:ContactManagerApp.Services"
       xmlns:converters="clr-namespace:ContactManagerApp.Converters"
+      xmlns:views="clr-namespace:ContactManagerApp.Views"
       Title="SettingsPage">
     <Page.Resources>
         <converters:LocalizationConverter x:Key="LocalizationConverter"/>
-
-        <!-- Стиль для заголовка -->
-        <Style x:Key="HeaderStyle" TargetType="TextBlock">
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <converters:IsNullOrEmptyConverter x:Key="IsNullOrEmptyConverter"/>
+        <converters:InitialsToColorConverter x:Key="InitialsToColorConverter"/>
+        <views:PathToImageSourceConverter x:Key="PathToImageSourceConverter"/>
+        
+        <!-- Стиль для іконки дії (плюсик або олівець) -->
+        <Style x:Key="PhotoActionIconStyle" TargetType="Border">
+            <Setter Property="Background" Value="#1A73E8"/>
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="CornerRadius" Value="35"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment" Value="Bottom"/>
+            <Setter Property="Margin" Value="0,0,12,3"/>
+            <Setter Property="Cursor" Value="Hand"/>
+        </Style>
+        
+        <!-- Стиль для самого ContextMenu -->
+        <Style TargetType="ContextMenu">
+            <Setter Property="Background" Value="{DynamicResource ContentBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="#888888" BlurRadius="10" ShadowDepth="2" Opacity="0.3"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ContextMenu">
+                        <Popup x:Name="PART_Popup" 
+                               AllowsTransparency="True" 
+                               Placement="MousePoint" 
+                               IsOpen="{TemplateBinding IsOpen}"
+                               PopupAnimation="Fade">
+                            <Border Background="{TemplateBinding Background}" 
+                                    BorderBrush="Transparent" 
+                                    BorderThickness="0" 
+                                    CornerRadius="5">
+                                <ItemsPresenter Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                        </Popup>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="HasDropShadow" Value="False"/>
+        </Style>
+        
+        <!-- Стиль для пунктів контекстного меню -->
+        <Style x:Key="ContextMenuItemStyle" TargetType="MenuItem">
+            <Setter Property="Background" Value="{DynamicResource ContentBackground}"/>
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
-            <Setter Property="FontSize" Value="20"/>
-            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="MenuItem">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0" ContentSource="Icon" Margin="0,0,10,0"/>
+                                <ContentPresenter Grid.Column="1" ContentSource="Header"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonActiveTextForeground}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Стиль для міток -->
@@ -19,15 +95,57 @@
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Margin" Value="0,0,0,5"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
         </Style>
 
         <!-- Стиль для текстових полів -->
-        <Style x:Key="DefaultTextBoxStyle" TargetType="PasswordBox">
-            <Setter Property="Padding" Value="10,6"/>
+        <Style x:Key="DefaultTextBoxStyle" TargetType="{x:Type TextBox}">
+            <Setter Property="Padding" Value="15,6"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
             <Setter Property="VerticalAlignment" Value="Center"/>
             <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="400"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="Border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,4,0,0"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#0078D4"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#0078D4"/>
+                                <Setter TargetName="Border" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#0078D4" Direction="0" ShadowDepth="0" Opacity="0.5" BlurRadius="5"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для PasswordBox -->
+        <Style x:Key="DefaultPasswordBoxStyle" TargetType="PasswordBox">
+            <Setter Property="Padding" Value="15,6"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="400"/>
             <Setter Property="FontFamily" Value="Segoe UI"/>
             <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
@@ -39,7 +157,7 @@
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
                                 CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,3,0,0"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -66,11 +184,12 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="FontWeight" Value="DemiBold"/>
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
-            <Setter Property="Padding" Value="20,2,20,0"/>
+            <Setter Property="Padding" Value="30,2,30,0"/>
             <Setter Property="Margin" Value="0,20,0,0"/>
             <Setter Property="MinHeight" Value="44"/>
-            <Setter Property="Width" Value="150"/>
+            <Setter Property="Width" Value="225"/>
             <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -89,124 +208,439 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        
+        <!-- Стиль для кнопки видалення акаунта -->
+        <Style x:Key="DeleteAccountButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#ef233c"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="DemiBold"/>
+            <Setter Property="Foreground" Value="#edf2f4"/>
+            <Setter Property="Padding" Value="30,0,30,0"/>
+            <Setter Property="Margin" Value="0,30,0,0"/>
+            <Setter Property="MinHeight" Value="40"/>
+            <Setter Property="Width" Value="200"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#d90429"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#d90429"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для вкладок -->
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="{DynamicResource ContentBackground}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0,0,0,2"/>
+            <Setter Property="TabStripPlacement" Value="Top"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <!-- Панель вкладок (TabPanel) по центру -->
+                            <TabPanel Grid.Row="0" 
+                                      IsItemsHost="True" 
+                                      HorizontalAlignment="Center"/>
+                            <!-- Вміст вкладки по лівому краю -->
+                            <ContentPresenter Grid.Row="1" 
+                                              ContentSource="SelectedContent" 
+                                              HorizontalAlignment="Left"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для заголовків вкладок -->
+        <Style TargetType="TabItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="10,12"/>
+            <Setter Property="MinWidth" Value="150"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Grid>
+                            <Border x:Name="Border" Background="Transparent" BorderBrush="Transparent" BorderThickness="0,0,0,0" CornerRadius="6,6,0,0">
+                                <ContentPresenter x:Name="ContentSite" ContentSource="Header" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <Border x:Name="BottomLine" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Margin="0,-1,0,0" Visibility="Collapsed"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ButtonActiveBackground}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonActiveTextForeground}"/>
+                                <Setter TargetName="BottomLine" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="BottomLine" Property="BorderBrush" Value="{DynamicResource ButtonHoverBackground}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="False">
+                                <Setter TargetName="BottomLine" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsMouseOver" Value="True"/>
+                                    <Condition Property="IsSelected" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для ComboBox -->
+        <Style x:Key="DefaultComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Background" Value="{DynamicResource ControlBackground}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="12"/>
+            <Setter Property="Margin" Value="0,10,0,15"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="Width" Value="300"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton x:Name="ToggleButton" 
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                                          ClickMode="Press">
+                                <ToggleButton.Content>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="30"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ContentPresenter Grid.Column="0"
+                                                          Content="{TemplateBinding SelectionBoxItem}"
+                                                          ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                          ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                                          Margin="12,2,0,3"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Left"/>
+                                        <Path x:Name="Arrow" Grid.Column="1" Fill="{DynamicResource TextColor}" 
+                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Data="M 0 0 L 4.5 4.5 L 9 0 Z"/>
+                                    </Grid>
+                                </ToggleButton.Content>
+                                <ToggleButton.Style>
+                                    <Style TargetType="ToggleButton">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="ToggleButton">
+                                                    <Border Background="{TemplateBinding Background}"
+                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                            CornerRadius="5">
+                                                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </ToggleButton.Style>
+                            </ToggleButton>
+                            <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                                <Grid x:Name="DropDown" SnapsToDevicePixels="True" 
+                                      MinWidth="{TemplateBinding ActualWidth}" MaxHeight="200">
+                                    <Border x:Name="DropDownBorder" Background="{DynamicResource ControlBackground}" 
+                                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"/>
+                                    <ScrollViewer Margin="4,6,4,6" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained"/>
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Стиль для елементів ComboBox -->
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
+            <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Regular"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource ButtonHoverBackground}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
     </Page.Resources>
     
     <Grid Margin="20" Background="{DynamicResource ContentBackground}">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Заголовок -->
-        <TextBlock Grid.Row="0" Style="{StaticResource HeaderStyle}"
-                   Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                 Converter={StaticResource LocalizationConverter}, 
-                                 ConverterParameter=Settings}"/>
-
         <!-- Налаштування -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <Grid Margin="0,20,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Center" MinWidth="3000">
+            <TabControl Margin="0,20,0,0">
+                <!-- Вкладка 1: User -->
+                <TabItem>
+                    <TabItem.Header>
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                          Converter={StaticResource LocalizationConverter}, 
+                                          ConverterParameter=User}"/>
+                    </TabItem.Header>
+                    <StackPanel Margin="1300,35,10,10" HorizontalAlignment="Center">
+                        <!-- Фото -->
+                        <Grid HorizontalAlignment="Center" Margin="0,0,0,24">
+                            <!-- Базовий круг (фон для ініціалів або фото) -->
+                            <Ellipse Width="198" Height="198" Margin="0,10,0,0" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown" Cursor="Hand">
+                                <Ellipse.Fill>
+                                    <SolidColorBrush Color="{Binding CurrentUser.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
+                                </Ellipse.Fill>
+                                <Ellipse.Effect>
+                                    <DropShadowEffect Color="{Binding Source={StaticResource ShadowColor}, Path=Color}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
+                                </Ellipse.Effect>
+                            </Ellipse>
+                            <!-- Фото (якщо є) -->
+                            <Ellipse Width="200" Height="200" Margin="0,10,0,0" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown" Cursor="Hand">
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding CurrentUser.PhotoPath, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
+                                </Ellipse.Fill>
+                                <Ellipse.Clip>
+                                    <EllipseGeometry RadiusX="100" RadiusY="100" Center="100,100"/>
+                                </Ellipse.Clip>
+                            </Ellipse>
+                            <!-- Ініціали (показуються, якщо фото немає або це стокове фото) -->
+                            <TextBlock Text="{Binding CurrentUser.Initials}" 
+                                       FontSize="50" 
+                                       FontWeight="SemiBold" 
+                                       Foreground="#FFFFFF" 
+                                       HorizontalAlignment="Center" 
+                                       VerticalAlignment="Center"
+                                       Margin="0,5,0,0" 
+                                       MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown"
+                                       Cursor="Hand"
+                                       Visibility="{Binding CurrentUser.PhotoPath, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Visible,Collapsed,Collapsed', FallbackValue=Visible}"/>
+                            <!-- Іконка для зміни фото -->
+                            <Border Style="{StaticResource PhotoActionIconStyle}" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown">
+                                <TextBlock x:Name="PhotoActionIcon" 
+                                           HorizontalAlignment="Center" 
+                                           VerticalAlignment="Center" 
+                                           Foreground="White">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="+"/>
+                                            <Setter Property="FontSize" Value="28"/>
+                                            <Setter Property="VerticalAlignment" Value="Center"/>
+                                            <Setter Property="Margin" Value="0,-6,0,0"/>
+                                            <Style.Triggers>
+                                                <!-- Показуємо олівець лише якщо фото НЕ стокове -->
+                                                <MultiDataTrigger>
+                                                    <MultiDataTrigger.Conditions>
+                                                        <Condition Binding="{Binding CurrentUser.PhotoPath, Converter={StaticResource IsNullOrEmptyConverter}}" Value="False"/>
+                                                        <Condition Binding="{Binding CurrentUser.IsPhotoDefault}" Value="False"/>
+                                                    </MultiDataTrigger.Conditions>
+                                                    <Setter Property="Text" Value=""/>
+                                                    <Setter Property="FontSize" Value="16"/>
+                                                    <Setter Property="Margin" Value="0,0,0,0"/>
+                                                    <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                                                </MultiDataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <TextBlock.ContextMenu>
+                                        <ContextMenu DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Page}}, Path=DataContext}">
+                                            <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=ChangePhoto}"
+                                                      Command="{Binding ChoosePhotoCommand}"
+                                                      Style="{StaticResource ContextMenuItemStyle}">
+                                                <MenuItem.Icon>
+                                                    <TextBlock Text="✏️" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=RemovePhoto}"
+                                                      Command="{Binding RemovePhotoCommand}"
+                                                      Style="{StaticResource ContextMenuItemStyle}">
+                                                <MenuItem.Icon>
+                                                    <TextBlock Text="🗑️" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                            <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Cancel}"
+                                                      Command="{Binding CancelContextMenuCommand}"
+                                                      Style="{StaticResource ContextMenuItemStyle}">
+                                                <MenuItem.Icon>
+                                                    <TextBlock Text="❌" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                                                </MenuItem.Icon>
+                                            </MenuItem>
+                                        </ContextMenu>
+                                    </TextBlock.ContextMenu>
+                                </TextBlock>
+                            </Border>
+                        </Grid>
 
-                <!-- Колонка 1: Вибір мови і теми -->
-                <StackPanel Grid.Column="0" Margin="0,0,20,0">
-                    <!-- Вибір мови -->
-                    <TextBlock Style="{StaticResource LabelStyle}"
-                               Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                             Converter={StaticResource LocalizationConverter}, 
-                                             ConverterParameter=Language}"/>
-                    <ComboBox x:Name="LanguageComboBox" Style="{StaticResource DefaultComboBoxStyle}" 
-                              Width="200" HorizontalAlignment="Left" Margin="0,30,0,20"
-                              SelectionChanged="LanguageComboBox_SelectionChanged">
-                        <ComboBoxItem Tag="en">
-                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                          Converter={StaticResource LocalizationConverter}, 
-                                          ConverterParameter=English}"/>
-                        </ComboBoxItem>
-                        <ComboBoxItem Tag="uk">
-                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                          Converter={StaticResource LocalizationConverter}, 
-                                          ConverterParameter=Ukrainian}"/>
-                        </ComboBoxItem>
-                    </ComboBox>
+                        <!-- Ім'я -->
+                        <TextBlock Style="{StaticResource LabelStyle}" Margin="0,10,0,5"
+                                   Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                 Converter={StaticResource LocalizationConverter}, 
+                                                 ConverterParameter=Name}"/>
+                        <TextBox x:Name="NameTextBox" Style="{StaticResource DefaultTextBoxStyle}" 
+                                 HorizontalAlignment="Left"
+                                 Text="{Binding CurrentUser.Name, UpdateSourceTrigger=PropertyChanged}" />
 
-                    <!-- Вибір теми -->
-                    <TextBlock Style="{StaticResource LabelStyle}"
-                               Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                             Converter={StaticResource LocalizationConverter}, 
-                                             ConverterParameter=Theme}"/>
-                    <ComboBox x:Name="ThemeComboBox" Style="{StaticResource DefaultComboBoxStyle}" 
-                              Width="200" HorizontalAlignment="Left" Margin="0,5,0,20"
-                              SelectionChanged="ThemeComboBox_SelectionChanged">
-                        <ComboBoxItem Tag="Light">
-                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                          Converter={StaticResource LocalizationConverter}, 
-                                          ConverterParameter=LightTheme}"/>
-                        </ComboBoxItem>
-                        <ComboBoxItem Tag="Dark">
-                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                          Converter={StaticResource LocalizationConverter}, 
-                                          ConverterParameter=DarkTheme}"/>
-                        </ComboBoxItem>
-                        <ComboBoxItem Tag="HighContrast">
-                            <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                          Converter={StaticResource LocalizationConverter}, 
-                                          ConverterParameter=HighContrastTheme}"/>
-                        </ComboBoxItem>
-                    </ComboBox>
-                </StackPanel>
+                        <!-- Номер телефону -->
+                        <TextBlock Style="{StaticResource LabelStyle}" Margin="0,10,0,5"
+                                   Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                 Converter={StaticResource LocalizationConverter}, 
+                                                 ConverterParameter=Phone}"/>
+                        <TextBox x:Name="PhoneTextBox" Style="{StaticResource DefaultTextBoxStyle}" 
+                                 HorizontalAlignment="Left"
+                                 Text="{Binding CurrentUser.PhoneNumber, UpdateSourceTrigger=PropertyChanged}" />
 
-                <!-- Колонка 2: Зміна пароля -->
-                <StackPanel Grid.Column="1" Margin="20,0,20,0">
-                    <TextBlock Style="{StaticResource LabelStyle}"
-                               Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                             Converter={StaticResource LocalizationConverter}, 
-                                             ConverterParameter=ChangePassword}"/>
-                    <StackPanel Margin="0,5,0,0">
-                        <TextBlock Style="{StaticResource LabelStyle}" Margin="0,0,0,5"
+                        <!-- Email -->
+                        <TextBlock Style="{StaticResource LabelStyle}" Margin="0,10,0,5"
+                                   Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                 Converter={StaticResource LocalizationConverter}, 
+                                                 ConverterParameter=Email}"/>
+                        <TextBox x:Name="EmailTextBox" Style="{StaticResource DefaultTextBoxStyle}" 
+                                 HorizontalAlignment="Left"
+                                 Text="{Binding CurrentUser.Email, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!-- Кнопка для збереження профілю -->
+                        <Button Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Center" Click="SaveProfile_Click"
+                                Content="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                  Converter={StaticResource LocalizationConverter}, 
+                                                  ConverterParameter=SaveProfile}"/>
+
+                        <!-- Зміна пароля -->
+                        <TextBlock Style="{StaticResource LabelStyle}" Margin="0,20,0,5"
                                    Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                  Converter={StaticResource LocalizationConverter}, 
                                                  ConverterParameter=OldPassword}"/>
-                        <PasswordBox x:Name="OldPasswordBox" Style="{StaticResource DefaultTextBoxStyle}" 
-                                     Width="200" HorizontalAlignment="Left"
-                                     PasswordChar="*" />
+                        <PasswordBox x:Name="OldPasswordBox" Style="{StaticResource DefaultPasswordBoxStyle}" 
+                                     HorizontalAlignment="Left"
+                                     PasswordChar="●"
+                                     PreviewMouseWheel="PasswordBox_PreviewMouseWheel" />
+
                         <TextBlock Style="{StaticResource LabelStyle}" Margin="0,10,0,5"
                                    Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                  Converter={StaticResource LocalizationConverter}, 
                                                  ConverterParameter=NewPassword}"/>
-                        <PasswordBox x:Name="NewPasswordBox" Style="{StaticResource DefaultTextBoxStyle}" 
-                                     Width="200" HorizontalAlignment="Left"
-                                     PasswordChar="*" />
+                        <PasswordBox x:Name="NewPasswordBox" Style="{StaticResource DefaultPasswordBoxStyle}" 
+                                     HorizontalAlignment="Left"
+                                     PasswordChar="●"
+                                     PreviewMouseWheel="PasswordBox_PreviewMouseWheel" />
+
                         <TextBlock Style="{StaticResource LabelStyle}" Margin="0,10,0,5"
                                    Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                  Converter={StaticResource LocalizationConverter}, 
                                                  ConverterParameter=ConfirmNewPassword}"/>
-                        <PasswordBox x:Name="ConfirmNewPasswordBox" Style="{StaticResource DefaultTextBoxStyle}" 
-                                     Width="200" HorizontalAlignment="Left"
-                                     PasswordChar="*" />
-                        <Button Style="{StaticResource ActionButtonStyle}" Click="ChangePassword_Click"
+                        <PasswordBox x:Name="ConfirmNewPasswordBox" Style="{StaticResource DefaultPasswordBoxStyle}" 
+                                     HorizontalAlignment="Left"
+                                     PasswordChar="●"
+                                     PreviewMouseWheel="PasswordBox_PreviewMouseWheel" />
+
+                        <Button Style="{StaticResource ActionButtonStyle}" HorizontalAlignment="Center" Click="ChangePassword_Click"
                                 Content="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                   Converter={StaticResource LocalizationConverter}, 
                                                   ConverterParameter=SavePassword}"/>
-                    </StackPanel>
-                </StackPanel>
 
-                <!-- Колонка 3: Видалення акаунту -->
-                <StackPanel Grid.Column="2" Margin="20,0,0,0">
-                    <TextBlock Style="{StaticResource LabelStyle}"
-                               Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
-                                             Converter={StaticResource LocalizationConverter}, 
-                                             ConverterParameter=DeleteAccount}"/>
-                    <Button Style="{StaticResource ActionButtonStyle}" Click="DeleteAccount_Click"
-                            Content="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                        <!-- Видалення акаунту -->
+                        <Button Style="{StaticResource DeleteAccountButtonStyle}" HorizontalAlignment="Center" Click="DeleteAccount_Click"
+                                Content="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                  Converter={StaticResource LocalizationConverter}, 
+                                                  ConverterParameter=DeleteAccount}"/>
+                    </StackPanel>
+                </TabItem>
+
+                <!-- Вкладка 2: Settings -->
+                <TabItem>
+                    <TabItem.Header>
+                        <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                          Converter={StaticResource LocalizationConverter}, 
+                                          ConverterParameter=Settings}"/>
+                    </TabItem.Header>
+                    <StackPanel Margin="1350,40,10,10" HorizontalAlignment="Center">
+                        <!-- Вибір мови -->
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                 Converter={StaticResource LocalizationConverter}, 
+                                                 ConverterParameter=Language}"/>
+                        <ComboBox x:Name="LanguageComboBox" Style="{StaticResource DefaultComboBoxStyle}" 
+                                  HorizontalAlignment="Left" Margin="0,5,0,20"
+                                  SelectionChanged="LanguageComboBox_SelectionChanged">
+                            <ComboBoxItem Tag="en">
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                               Converter={StaticResource LocalizationConverter}, 
-                                              ConverterParameter=DeleteAccount}"/>
-                </StackPanel>
-            </Grid>
+                                              ConverterParameter=English}"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="uk">
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=Ukrainian}"/>
+                            </ComboBoxItem>
+                        </ComboBox>
+
+                        <!-- Вибір теми -->
+                        <TextBlock Style="{StaticResource LabelStyle}"
+                                   Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                                 Converter={StaticResource LocalizationConverter}, 
+                                                 ConverterParameter=Theme}"/>
+                        <ComboBox x:Name="ThemeComboBox" Style="{StaticResource DefaultComboBoxStyle}" 
+                                  HorizontalAlignment="Left" Margin="0,5,0,20"
+                                  SelectionChanged="ThemeComboBox_SelectionChanged">
+                            <ComboBoxItem Tag="Light">
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=LightTheme}"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="Dark">
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=DarkTheme}"/>
+                            </ComboBoxItem>
+                            <ComboBoxItem Tag="HighContrast">
+                                <TextBlock Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
+                                              Converter={StaticResource LocalizationConverter}, 
+                                              ConverterParameter=HighContrastTheme}"/>
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
         </ScrollViewer>
     </Grid>
 </Page>

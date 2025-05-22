@@ -100,6 +100,7 @@
             <Setter Property="Padding" Value="20,2,20,0"/>
             <Setter Property="Margin" Value="0,20,50,0"/>
             <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -129,6 +130,7 @@
             <Setter Property="Padding" Value="0"/>
             <Setter Property="Width" Value="36"/>
             <Setter Property="Height" Value="36"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -163,6 +165,7 @@
             <Setter Property="Foreground" Value="{DynamicResource TextColor}"/>
             <Setter Property="Height" Value="36"/>
             <Setter Property="Width" Value="550"/>
+            <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -277,7 +280,7 @@
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
                                 CornerRadius="6">
-                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0,3,0,0"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -307,6 +310,7 @@
     <Setter Property="Margin" Value="0,10,0,15"/>
     <Setter Property="Height" Value="40"/>
     <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Cursor" Value="Hand"/>
     <Setter Property="Template">
         <Setter.Value>
             <ControlTemplate TargetType="ComboBox">
@@ -328,7 +332,7 @@
                                                   Content="{TemplateBinding SelectionBoxItem}"
                                                   ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
                                                   ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                                  Margin="5,3,0,3"
+                                                  Margin="10,2,0,3"
                                                   VerticalAlignment="Center"
                                                   HorizontalAlignment="Left"
                                                   TextElement.Foreground="{DynamicResource TextColor}"/>
@@ -387,6 +391,7 @@
     <Setter Property="Background" Value="{DynamicResource WindowBackground}"/>
     <Setter Property="Padding" Value="5"/>
     <Setter Property="FontSize" Value="16"/>
+    <Setter Property="Cursor" Value="Hand"/>
     <Setter Property="Template">
         <Setter.Value>
             <ControlTemplate TargetType="ComboBoxItem">
@@ -477,90 +482,93 @@
         <ScrollViewer Grid.Row="1" Width="950" VerticalScrollBarVisibility="Hidden" HorizontalAlignment="Left">
             <StackPanel MaxWidth="950" Margin="50,0,0,0">
                 <!-- Фото -->
-                <Grid HorizontalAlignment="Left" Margin="5,0,0,24">
-                    <!-- Базовий круг (фон для ініціалів або фото) -->
-                    <Ellipse Width="158" Height="158" Margin="0,10,0,0">
-                        <Ellipse.Fill>
-                            <SolidColorBrush Color="{Binding EditedContact.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
-                        </Ellipse.Fill>
-                        <Ellipse.Effect>
-                            <DropShadowEffect Color="{Binding Source={StaticResource ShadowColor}, Path=Color}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
-                        </Ellipse.Effect>
-                    </Ellipse>
-                    <!-- Фото (якщо є) -->
-                    <Ellipse Width="160" Height="160" Margin="0,10,0,0">
-                        <Ellipse.Fill>
-                            <ImageBrush ImageSource="{Binding EditedContact.Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
-                        </Ellipse.Fill>
-                        <Ellipse.Clip>
-                            <EllipseGeometry RadiusX="80" RadiusY="80" Center="80,80"/>
-                        </Ellipse.Clip>
-                    </Ellipse>
-                    <!-- Ініціали (показуються, якщо фото немає або це стокове фото) -->
-                    <TextBlock Text="{Binding EditedContact.Initials}" 
-                               FontSize="40" 
-                               FontWeight="SemiBold" 
-                               Foreground="#FFFFFF" 
-                               HorizontalAlignment="Center" 
-                               VerticalAlignment="Center"
-                               Visibility="{Binding EditedContact.Photo, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Visible,Collapsed,Collapsed', FallbackValue=Visible}"/>
-                    <!-- Іконка для зміни фото -->
-                    <Border Style="{StaticResource PhotoActionIconStyle}" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown">
-                        <TextBlock x:Name="PhotoActionIcon" 
-                                   HorizontalAlignment="Center" 
-                                   VerticalAlignment="Center" 
-                                   Foreground="White">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="+"/>
-                                    <Setter Property="FontSize" Value="28"/>
-                                    <Setter Property="VerticalAlignment" Value="Center"/>
-                                    <Setter Property="Margin" Value="0,-6,0,0"/>
-                                    <Style.Triggers>
-                                        <!-- Показуємо олівець лише якщо фото НЕ стокове -->
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding EditedContact.Photo, Converter={StaticResource IsNullOrEmptyConverter}}" Value="False"/>
-                                                <Condition Binding="{Binding EditedContact.IsPhotoDefault}" Value="False"/>
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Text" Value=""/>
-                                            <Setter Property="FontSize" Value="16"/>
-                                            <Setter Property="Margin" Value="0,0,0,0"/>
-                                            <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
-                                            <Setter Property="VerticalAlignment" Value="Center"/>
-                                            <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                            <TextBlock.ContextMenu>
-                                <ContextMenu DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Page}}, Path=DataContext}">
-                                    <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=ChangePhoto}"
-                                              Command="{Binding ChoosePhotoCommand}"
-                                              Style="{StaticResource ContextMenuItemStyle}">
-                                        <MenuItem.Icon>
-                                            <TextBlock Text="✏️" FontFamily="Segoe UI Emoji" FontSize="13"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=RemovePhoto}"
-                                              Command="{Binding RemovePhotoCommand}"
-                                              Style="{StaticResource ContextMenuItemStyle}">
-                                        <MenuItem.Icon>
-                                            <TextBlock Text="🗑️" FontFamily="Segoe UI Emoji" FontSize="13"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                    <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Cancel}"
-                                              Command="{Binding CancelContextMenuCommand}"
-                                              Style="{StaticResource ContextMenuItemStyle}">
-                                        <MenuItem.Icon>
-                                            <TextBlock Text="❌" FontFamily="Segoe UI Emoji" FontSize="13"/>
-                                        </MenuItem.Icon>
-                                    </MenuItem>
-                                </ContextMenu>
-                            </TextBlock.ContextMenu>
-                        </TextBlock>
-                    </Border>
-                </Grid>
+<Grid HorizontalAlignment="Left" Margin="5,0,0,24">
+    <!-- Базовий круг (фон для ініціалів або фото) -->
+    <Ellipse Width="158" Height="158" Margin="0,10,0,0" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown" Cursor="Hand">
+        <Ellipse.Fill>
+            <SolidColorBrush Color="{Binding EditedContact.Initials, Converter={StaticResource InitialsToColorConverter}}"/>
+        </Ellipse.Fill>
+        <Ellipse.Effect>
+            <DropShadowEffect Color="{Binding Source={StaticResource ShadowColor}, Path=Color}" BlurRadius="13" ShadowDepth="0" Opacity="0.5"/>
+        </Ellipse.Effect>
+    </Ellipse>
+        <!-- Фото (якщо є) -->
+        <Ellipse Width="160" Height="160" Margin="0,10,0,0" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown" Cursor="Hand">
+            <Ellipse.Fill>
+                <ImageBrush ImageSource="{Binding EditedContact.Photo, Converter={StaticResource PathToImageSourceConverter}, UpdateSourceTrigger=PropertyChanged}" Stretch="UniformToFill"/>
+            </Ellipse.Fill>
+            <Ellipse.Clip>
+                <EllipseGeometry RadiusX="80" RadiusY="80" Center="80,80"/>
+            </Ellipse.Clip>
+        </Ellipse>
+        <!-- Ініціали (показуються, якщо фото немає або це стокове фото) -->
+        <TextBlock Text="{Binding EditedContact.Initials}" 
+                   FontSize="40" 
+                   FontWeight="SemiBold" 
+                   Foreground="#FFFFFF" 
+                   HorizontalAlignment="Center" 
+                   VerticalAlignment="Center"
+                   Margin="0,5,0,0"
+                   MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown"
+                   Cursor="Hand"
+                   Visibility="{Binding EditedContact.Photo, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter='Visible,Collapsed,Collapsed', FallbackValue=Visible}"/>
+        <!-- Іконка для зміни фото -->
+        <Border Style="{StaticResource PhotoActionIconStyle}" MouseLeftButtonDown="PhotoActionIcon_MouseLeftButtonDown">
+            <TextBlock x:Name="PhotoActionIcon" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" 
+                       Foreground="White">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Text" Value="+"/>
+                        <Setter Property="FontSize" Value="28"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="Margin" Value="0,-6,0,0"/>
+                        <Style.Triggers>
+                            <!-- Показуємо олівець лише якщо фото НЕ стокове -->
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding EditedContact.Photo, Converter={StaticResource IsNullOrEmptyConverter}}" Value="False"/>
+                                    <Condition Binding="{Binding EditedContact.IsPhotoDefault}" Value="False"/>
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Text" Value=""/>
+                                <Setter Property="FontSize" Value="16"/>
+                                <Setter Property="Margin" Value="0,0,0,0"/>
+                                <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="Foreground" Value="{DynamicResource ButtonTextForeground}"/>
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+                <TextBlock.ContextMenu>
+                    <ContextMenu DataContext="{Binding RelativeSource={RelativeSource AncestorType={x:Type Page}}, Path=DataContext}">
+                        <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=ChangePhoto}"
+                                  Command="{Binding ChoosePhotoCommand}"
+                                  Style="{StaticResource ContextMenuItemStyle}">
+                            <MenuItem.Icon>
+                                <TextBlock Text="✏️" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=RemovePhoto}"
+                                  Command="{Binding RemovePhotoCommand}"
+                                  Style="{StaticResource ContextMenuItemStyle}">
+                            <MenuItem.Icon>
+                                <TextBlock Text="🗑️" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                        <MenuItem Header="{Binding Source={x:Static services:LocalizationManager.Instance}, Converter={StaticResource LocalizationConverter}, ConverterParameter=Cancel}"
+                                  Command="{Binding CancelContextMenuCommand}"
+                                  Style="{StaticResource ContextMenuItemStyle}">
+                            <MenuItem.Icon>
+                                <TextBlock Text="❌" FontFamily="Segoe UI Emoji" FontSize="13"/>
+                            </MenuItem.Icon>
+                        </MenuItem>
+                    </ContextMenu>
+                </TextBlock.ContextMenu>
+            </TextBlock>
+        </Border>
+    </Grid>
 
                 <!-- Ім'я -->
                 <StackPanel Margin="0,30,0,0">
@@ -600,7 +608,7 @@
                     <Button Style="{StaticResource AddButtonStyle}" Click="AddPhoneNumber_Click" Margin="43,8,0,0" HorizontalAlignment="Left">
                         <TextBlock Foreground="{DynamicResource TextColor}" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                   Converter={StaticResource LocalizationConverter}, 
-                                                  ConverterParameter=AddPhoneNumber}"/>
+                                                  ConverterParameter=AddPhoneNumber}" Margin="0,-2,0,0"/>
                     </Button>
                 </StackPanel>
 
@@ -635,7 +643,7 @@
                             ToolTip="Add Email Address">
                         <TextBlock Foreground="{DynamicResource TextColor}" Text="{Binding Source={x:Static services:LocalizationManager.Instance}, 
                                                   Converter={StaticResource LocalizationConverter}, 
-                                                  ConverterParameter=AddEmail}"/>
+                                                  ConverterParameter=AddEmail}" Margin="0,-2,0,0"/>
                     </Button>
                 </StackPanel>
 

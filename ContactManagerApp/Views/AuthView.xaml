@@ -3,9 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converters="clr-namespace:ContactManagerApp.Converters"
         xmlns:views="clr-namespace:ContactManagerApp.Views"
-        Title="Authentication" Height="500" Width="400" MinWidth="400" MinHeight="500"
+        Title="Authentication" Height="540" Width="440" MinWidth="440" MinHeight="540"
         Icon="/Assets/Photo/icon.ico"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
     <Window.Background>
         <SolidColorBrush Color="#fff"/>
     </Window.Background>
@@ -227,16 +229,16 @@
 
     <Grid>
         <!-- Плитка LoginView -->
-        <views:LoginView x:Name="LoginTile" Visibility="Visible">
+        <views:LoginView x:Name="LoginTile" Visibility="Visible" Opacity="1">
             <views:LoginView.RenderTransform>
                 <TranslateTransform X="0"/>
             </views:LoginView.RenderTransform>
         </views:LoginView>
 
         <!-- Плитка RegistrationView -->
-        <views:RegistrationView x:Name="RegistrationTile" Visibility="Collapsed">
+        <views:RegistrationView x:Name="RegistrationTile" Visibility="Collapsed" Opacity="0">
             <views:RegistrationView.RenderTransform>
-                <TranslateTransform X="400"/>
+                <TranslateTransform X="440"/> <!-- Ширина вікна, щоб починати зправа -->
             </views:RegistrationView.RenderTransform>
         </views:RegistrationView>
     </Grid>

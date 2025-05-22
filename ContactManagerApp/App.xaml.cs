@@ -80,8 +80,7 @@ namespace ContactManagerApp
                 var user = users.FirstOrDefault(u => u.Token == token && u.IsActive);
                 if (user != null && user.TokenExpiration > DateTime.UtcNow)
                 {
-                    // Встановлюємо TokenExpiration на 10 хвилин після закриття
-                    user.TokenExpiration = DateTime.UtcNow.AddSeconds(5);
+                    user.TokenExpiration = DateTime.UtcNow.AddDays(1);
                     AuthService.SaveUsers(users);
                     System.Diagnostics.Debug.WriteLine($"Updated TokenExpiration to {user.TokenExpiration} for UserId: {user.UserId}");
                 }

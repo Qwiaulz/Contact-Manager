@@ -11,7 +11,7 @@
     <!-- Кольори кнопок -->
     <SolidColorBrush x:Key="ButtonBackground" Color="#0b57d0"/>
     <SolidColorBrush x:Key="ButtonForeground" Color="#ffffff"/>
-    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#242424"/>
+    <SolidColorBrush x:Key="ButtonHoverBackground" Color="#444140"/>
     <SolidColorBrush x:Key="ButtonActiveBackground" Color="#163f5a"/>
     <SolidColorBrush x:Key="ButtonTextForeground" Color="#bfbfbf"/>
     <SolidColorBrush x:Key="ButtonActiveTextForeground" Color="#99c3e6"/>
@@ -22,7 +22,7 @@
     <SolidColorBrush x:Key="SidebarBackground" Color="#F3F3F3"/>
     
     <!-- Межа -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#555555"/>
+    <SolidColorBrush x:Key="BorderBrush" Color="#595959"/>
     
     <!-- Колір тіні -->
     <Color x:Key="ShadowColor">#CFCFCF</Color>
